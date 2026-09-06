@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import authRoutes from './auh.routes.js';
+import authRoutes from './auth.routes.js';
 import rolesRoutes from './roles.routes.js';
 import usuariosRoutes from './usuarios.routes.js';
 import clientesRoutes from './clientes.routes.js';

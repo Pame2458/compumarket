@@ -1,7 +1,8 @@
 import { compararPassword, generarToken, verificarToken, JWT_SECRET_CLIENT, JWT_SECRET_ADMIN } from '../utils/auth.js';
 import Cliente from '../models/clientes.model.js';
 import Usuario from '../models/usuarios.model.js';
-import Rol from '../models/roles.model.js';
+import { emisorDeCorreo } from '../config/configuracionCorreo.js';
+
 
 // 🔑 LOGIN CLIENTE
 export const loginCliente = async (req, res) => {
@@ -40,7 +41,7 @@ export const loginCliente = async (req, res) => {
     }
 };
 
-//  REGISTRO CLIENTE 
+// 💎 REGISTRO CLIENTE MEJORADO
 export const registrarCliente = async (req, res) => {
     try {
         const { nombre, apellido, email, password } = req.body;
@@ -130,13 +131,7 @@ export const loginAdmin = async (req, res) => {
             return res.status(400).json({ estado: false, mensaje: 'Debe proporcionar email y password' });
         }
 
-        // 👇 Se agrega el include del Rol: sin esto, el frontend no puede
-        // saber si el usuario es ADMIN u OPERADOR, y el panel se queda
-        // en modo "solo lectura" aunque el usuario sí sea administrador.
-        const usuario = await Usuario.findOne({
-            where: { email: email.toLowerCase().trim() },
-            include: [{ model: Rol, as: 'rol' }]
-        });
+        const usuario = await Usuario.findOne({ where: { email: email.toLowerCase().trim() } });
         if (!usuario) {
             return res.status(401).json({ estado: false, mensaje: 'Credenciales inválidas' });
         }
@@ -196,8 +191,8 @@ export const forgotPassword = async (req, res) => {
         if (!email) {
             return res.status(400).json({ estado: false, mensaje: 'El email es requerido.' });
         }
-
-        const cliente = await Cliente.findOne({ where: { email: email.toLowerCase().trim() } });
+        const emailNormalizado = email.toLowerCase().trim();
+        const cliente = await Cliente.findOne({ where: { email: emailNormalizado } });
         
         // Criterio de seguridad: No revelar si el correo existe o no en la Base de Datos
         if (!cliente) {
@@ -214,11 +209,31 @@ export const forgotPassword = async (req, res) => {
             { expiresIn: '15m' }
         );
 
-        // Simulamos el envío del correo imprimiéndolo en la consola del Backend para tus pruebas
+        
         const enlaceRecuperacion = `http://localhost:5173/restablecer-password?token=${tokenRecuperacion}`;
-        console.log('\n📥 [EMAIL SIMULADO] Enlace enviado a:', cliente.email);
-        console.log('🔗 URL:', enlaceRecuperacion, '\n');
-
+        // 🌟 CAMBIO: Envío real utilizando Nodemailer
+        await emisorDeCorreo.sendMail({
+            from: `"Soporte compuMarket 🛒" <${process.env.CORREO_EMISOR}>`,
+            to: cliente.email,
+            subject: "Recuperá tu contraseña - compuMarket",
+            html: `
+                <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+                    <h2 style="color: #dc2626; font-weight: 900; margin-bottom: 5px;">compuMarket</h2>
+                    <h3 style="color: #0f172a; margin-top: 0; font-size: 16px;">Restablecimiento de Contraseña</h3>
+                    <p style="color: #475569; font-size: 14px; line-height: 1.5;">
+                        Hola, ${cliente.nombre}. Recibimos una solicitud para cambiar la contraseña de acceso a tu cuenta en nuestra comunidad de hardware de alto rendimiento.
+                    </p>
+                    <div style="text-align: center; margin: 25px 0;">
+                        <a href="${enlaceRecuperacion}" style="background-color: #dc2626; color: white; padding: 12px 24px; text-decoration: none; font-weight: bold; border-radius: 8px; font-size: 14px; display: inline-block; text-transform: uppercase;">
+                            Establecer Nueva Contraseña
+                        </a>
+                    </div>
+                    <p style="color: #94a3b8; font-size: 11px;">
+                        Si tú no solicitaste este proceso, puedes ignorar este mensaje con total seguridad.
+                    </p>
+                </div>
+            `
+        });
         return res.json({
             estado: true,
             mensaje: 'Si el correo está registrado, recibirás un enlace de recuperación en los próximos minutos.'
@@ -232,14 +247,19 @@ export const forgotPassword = async (req, res) => {
 // 🔒 2. ESTABLECER LA NUEVA CONTRASEÑA EN LA DB (Completado y Reparado)
 export const resetPassword = async (req, res) => {
     try {
-        const { token, nuevaContraseña } = req.body;
+        const { token, password} = req.body;
 
-        if (!token || !nuevaContraseña) {
+        if (!token || !password) {
             return res.status(400).json({ estado: false, mensaje: 'El token y la nueva contraseña son requeridos.' });
         }
 
-        if (nuevaContraseña.length < 6) {
-            return res.status(400).json({ estado: false, mensaje: 'La contraseña debe contener al menos 6 caracteres.' });
+        // 🌟 CAMBIO REALIZADO: Validación estricta sincronizada con el Frontend de React
+        const expresionPassword = /^(?=.[A-Z])(?=.\d)(?=.*[^A-Za-z0-9]).{10,}$/;
+        if (!expresionPassword.test(password)) {
+            return res.status(400).json({ 
+                estado: false, 
+                mensaje: 'La contraseña debe tener mínimo 10 caracteres, al menos 1 mayúscula, 1 número y 1 símbolo.' 
+            });
         }
 
         let decoded;
@@ -260,8 +280,8 @@ export const resetPassword = async (req, res) => {
         }
 
         // Actualizamos las propiedades. Al guardarlas, el Hook de Sequelize actuará automáticamente
-        cliente.contraseña = nuevaContraseña;
-        cliente.password = nuevaContraseña; 
+        cliente.contraseña = password;
+        cliente.password = password; 
         await cliente.save();
 
         return res.json({

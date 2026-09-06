@@ -1,4 +1,4 @@
-// authService.js - Maneja las peticiones de autenticación utilizando la instancia de Axios.
+//authService.js - Maneja las peticiones de autenticación utilizando la instancia de Axios.
 import api from './api.js';
 
 // POST /auth/cliente/login -> Inicia sesión como cliente.
@@ -40,6 +40,6 @@ export const forgotPasswordCliente = async (email) => {
 
 // 🔒 2. POST /auth/cliente/reset-password -> Envía el token y la nueva contraseña para impactar en MySQL
 export const restablecerPasswordCliente = async (token, nuevaContraseña) => {
-    const respuesta = await api.post('/auth/cliente/reset-password', { token, nuevaContraseña });
+    const respuesta = await api.post('/auth/cliente/reset-password', { token, password:nuevaContraseña });
     return respuesta;
 };

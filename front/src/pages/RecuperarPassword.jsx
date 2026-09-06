@@ -1,7 +1,6 @@
 /// src/pages/RecuperarPassword.jsx
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-// 🌟 Cambiamos la importación directa de Axios por tu archivo de servicios formal
 import { forgotPasswordCliente } from '../services/authService.js'; 
 import logo from '../img/logo.jpg';
 

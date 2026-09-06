@@ -1,15 +1,16 @@
+import 'dotenv/config';
 
 import express from "express";
 import cors from "cors";
 // Importamos el enrutador central de la API como 'default' (sin llaves)
 import router from './routes/index.js'; 
 import sequelize from './config/database.js';
+import {emisorDeCorreo} from './config/configuracionCorreo.js'; // Importación del archivo de configuración de correo   
 
 // Importamos el índice de modelos para que Sequelize registre las asociaciones del DER.
 import './models/index.js';
 // 🌟 IMPORTACIÓN DEL SEEDER DE COMPUTACIÓN
 import { seedComputacion } from './seeders/ecommerce.seeder.js';
-//import { seedAdminInicial } from './seeders/admin.seeder.js';
 // ...
 // Descomentar UNA SOLA VEZ, correr, y volver a comentar:
 
@@ -55,13 +56,24 @@ const iniciarServidor = async () => {
         // Sincronización segura de la estructura de tablas en desarrollo diario
         //await sequelize.sync({ force: true });
 
-        await sequelize.sync({ alter: true });
+       await sequelize.sync({ alter: true });
         console.log('Conexión a la base de datos establecida y tablas sincronizadas correctamente.');
                // 🌟 EJECUCIÓN DEL SEEDER 
-           // await seedAdminInicial();
-            await seedComputacion();
-
+   /* try{
+           
+         //   await seedComputacion();
+    }catch(error){
+        console.error('Error al ejecutar el seeder:', error);
+    }*/
         // app.listen() pone al servidor a escuchar peticiones en el puerto indicado.
+        // 🌟 CAMBIO 2: Agregamos la verificación explícita aquí adentro para ver si conecta el mail
+        emisorDeCorreo.verify()
+            .then(() => {
+                console.log('✅ El servidor de correos (Nodemailer) está conectado y listo.');
+            })
+            .catch((errorDeConexion) => {
+                console.error('❌ Error: El servidor no se pudo conectar a Gmail:', errorDeConexion.message);
+            });
         app.listen(PUERTO, () => {
             console.log('Servidor iniciado correctamente en el puerto:', PUERTO);
             console.log(`API disponible en: http://localhost:${PUERTO}/api`);

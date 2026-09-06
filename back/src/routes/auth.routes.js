@@ -29,4 +29,5 @@ router.get('/cliente/perfil', verificarCliente, obtenerPerfilCliente);
 router.get('/admin/refresh', verificarAdmin, refreshTokenAdmin);
 router.get('/admin/perfil', verificarAdmin, obtenerPerfilAdmin);
 
+
 export default router;
