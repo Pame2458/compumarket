@@ -6,7 +6,7 @@ function Inicio() {
             {/* Hero Section - compuMarket */}
             <section className="rounded-3xl bg-slate-900 px-8 py-16 text-white shadow-xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none hidden md:block">
-                    <span className="text-9xl font-black">TECH</span>
+                    <span className="text-9xl font-black"></span>
                 </div>
                 <p className="mb-3 text-sm uppercase tracking-[0.2em] text-red-400 font-bold">E-Commerce de Tecnología</p>
                 <h1 className="mb-4 text-4xl font-black text-white md:text-5xl tracking-tight">

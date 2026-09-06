@@ -13,10 +13,10 @@ function LaptopsNotebooks() {
         const cargarLaptops = async () => {
             try {
                 // Según tu DER, filtramos por el ID correspondiente a Laptops/Notebooks (Ej: ID 3)
-                const respuesta = await api.get('/productos?idCategoria=3');
-                if (respuesta.data.estado) {
-                    setProductos(respuesta.data.data);
-                }
+                const respuesta = await api.get('/productos?idCategoria=1');
+                
+                    setProductos(respuesta);
+                
             } catch (error) {
                 console.error("Error al cargar laptops desde MySQL:", error);
             } finally {

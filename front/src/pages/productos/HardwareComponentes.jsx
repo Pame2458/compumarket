@@ -12,7 +12,7 @@ function HardwareComponentes() {
  useEffect(() => {
     const cargarHardware = async () => {
         try {
-            const respuesta = await api.get('/productos?idCategoria=1');
+            const respuesta = await api.get('/productos?idCategoria=3');
             setProductos(respuesta); // respuesta ya es el array
         } catch (error) {
             console.error("Error al cargar componentes de hardware desde MySQL:", error);

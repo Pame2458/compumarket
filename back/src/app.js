@@ -9,7 +9,7 @@ import sequelize from './config/database.js';
 import './models/index.js';
 // 🌟 IMPORTACIÓN DEL SEEDER DE COMPUTACIÓN
 import { seedComputacion } from './seeders/ecommerce.seeder.js';
-import { seedAdminInicial } from './seeders/admin.seeder.js';
+//import { seedAdminInicial } from './seeders/admin.seeder.js';
 // ...
 // Descomentar UNA SOLA VEZ, correr, y volver a comentar:
 
@@ -58,7 +58,7 @@ const iniciarServidor = async () => {
         await sequelize.sync({ alter: true });
         console.log('Conexión a la base de datos establecida y tablas sincronizadas correctamente.');
                // 🌟 EJECUCIÓN DEL SEEDER 
-            await seedAdminInicial();
+           // await seedAdminInicial();
             await seedComputacion();
 
         // app.listen() pone al servidor a escuchar peticiones en el puerto indicado.

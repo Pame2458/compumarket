@@ -1,8 +1,9 @@
-// src/pages/RecuperarPassword.jsx
+/// src/pages/RecuperarPassword.jsx
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 // 🌟 Cambiamos la importación directa de Axios por tu archivo de servicios formal
 import { forgotPasswordCliente } from '../services/authService.js'; 
+import logo from '../img/logo.jpg';
 
 function RecuperarPassword() {
     const [email, setEmail] = useState('');
@@ -43,6 +44,11 @@ function RecuperarPassword() {
     return (
         <div className="mx-auto max-w-md space-y-6 pt-4">
             <div className="text-center flex flex-col items-center">
+                <img 
+                    src={logo}
+                    alt="Logo compuMarket" 
+                    className="h-14 w-auto mb-3 object-contain"
+                />
                 <div className="w-20 h-20 bg-slate-900/5 rounded-full flex items-center justify-center p-3 mb-2 border border-slate-200">
                     <svg className="w-12 h-12 text-slate-800" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" />
@@ -102,4 +108,3 @@ function RecuperarPassword() {
 }
 
 export default RecuperarPassword;
-

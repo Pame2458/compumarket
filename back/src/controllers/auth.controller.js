@@ -1,6 +1,7 @@
 import { compararPassword, generarToken, verificarToken, JWT_SECRET_CLIENT, JWT_SECRET_ADMIN } from '../utils/auth.js';
 import Cliente from '../models/clientes.model.js';
 import Usuario from '../models/usuarios.model.js';
+import Rol from '../models/roles.model.js';
 
 // 🔑 LOGIN CLIENTE
 export const loginCliente = async (req, res) => {
@@ -39,7 +40,7 @@ export const loginCliente = async (req, res) => {
     }
 };
 
-// 💎 REGISTRO CLIENTE MEJORADO
+//  REGISTRO CLIENTE 
 export const registrarCliente = async (req, res) => {
     try {
         const { nombre, apellido, email, password } = req.body;
@@ -129,7 +130,13 @@ export const loginAdmin = async (req, res) => {
             return res.status(400).json({ estado: false, mensaje: 'Debe proporcionar email y password' });
         }
 
-        const usuario = await Usuario.findOne({ where: { email: email.toLowerCase().trim() } });
+        // 👇 Se agrega el include del Rol: sin esto, el frontend no puede
+        // saber si el usuario es ADMIN u OPERADOR, y el panel se queda
+        // en modo "solo lectura" aunque el usuario sí sea administrador.
+        const usuario = await Usuario.findOne({
+            where: { email: email.toLowerCase().trim() },
+            include: [{ model: Rol, as: 'rol' }]
+        });
         if (!usuario) {
             return res.status(401).json({ estado: false, mensaje: 'Credenciales inválidas' });
         }
@@ -266,4 +273,3 @@ export const resetPassword = async (req, res) => {
         return res.status(500).json({ estado: false, mensaje: 'Error interno al cambiar la contraseña.' });
     }
 };
-

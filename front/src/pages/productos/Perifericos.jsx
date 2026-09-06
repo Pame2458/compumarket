@@ -14,9 +14,9 @@ function Perifericos() {
             try {
                 // Según tu DER, filtramos por el ID correspondiente a Periféricos (Ej: ID 2)
                 const respuesta = await api.get('/productos?idCategoria=2');
-                if (respuesta.data.estado) {
-                    setProductos(respuesta.data.data);
-                }
+                
+                    setProductos(respuesta);
+                
             } catch (error) {
                 console.error("Error al cargar periféricos desde MySQL:", error);
             } finally {
