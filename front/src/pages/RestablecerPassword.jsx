@@ -2,6 +2,8 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { restablecerPasswordCliente } from '../services/authService.js';
+import logo from '../img/logo.jpg';
+
 
 function RestablecerPassword() {
     const navigate = useNavigate();
@@ -13,6 +15,17 @@ function RestablecerPassword() {
     const [error, setError] = useState('');
     const [mensajeExito, setMensajeExito] = useState('');
     const [enviando, setEnviando] = useState(false);
+    const [mostrarNueva, setMostrarNueva] = useState(false);
+    const [mostrarConfirmar, setMostrarConfirmar] = useState(false);
+
+    const validaciones = {
+    longitud: nuevaContraseña.length >= 10,
+    mayuscula: /[A-Z]/.test(nuevaContraseña),
+    numero: /[0-9]/.test(nuevaContraseña),
+    simbolo: /[^A-Za-z0-9]/.test(nuevaContraseña)
+};
+
+const esPasswordValido = Object.values(validaciones).every(Boolean);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -24,10 +37,17 @@ function RestablecerPassword() {
             return;
         }
 
-        if (nuevaContraseña.length < 6) {
-            setError('La contraseña debe contener al menos 6 caracteres.');
-            return;
-        }
+        // NUEVA VALIDACIÓN COMPLETA
+if (!esPasswordValido) {
+    setError('La contraseña no cumple con los requisitos de seguridad mínimos.');
+    return;
+}
+
+if (nuevaContraseña !== confirmarContraseña) {
+    setError('Las contraseñas ingresadas no coinciden.');
+    return;
+}
+
 
         if (nuevaContraseña !== confirmarContraseña) {
             setError('Las contraseñas ingresadas no coinciden.');
@@ -56,16 +76,15 @@ function RestablecerPassword() {
             setEnviando(false);
         }
     };
-
     return (
         <div className="mx-auto max-w-md space-y-6 pt-4">
-            <div className="text-center flex flex-col items-center">
-                <div className="w-20 h-20 bg-slate-900/5 rounded-full flex items-center justify-center p-3 mb-2 border border-slate-200">
-                    <svg className="w-12 h-12 text-slate-800" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
-                    </svg>
-                </div>
-                
+            {/* Encabezado con el Logo de tu proyecto */}
+            <div className="text-center flex flex-col items-center justify-center">
+                <img 
+                    src={logo}
+                    alt="Logo compuMarket" 
+                    className="h-14 w-auto mb-3 object-contain"
+                />
                 <h1 className="text-2xl font-black text-slate-900 tracking-tight">
                     Nueva Contraseña
                 </h1>
@@ -74,6 +93,7 @@ function RestablecerPassword() {
                 </p>
             </div>
 
+            {/* Mensajes de Alertas */}
             {error && (
                 <div className="rounded-xl border border-red-200 bg-red-50 p-3.5 text-xs font-semibold text-red-700 animate-fade-in">
                     {error}
@@ -93,30 +113,77 @@ function RestablecerPassword() {
                 </div>
             ) : (
                 <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                    {/* Nueva Contraseña con Mostrar/Ocultar e indicadores */}
                     <div>
                         <label className="mb-1 block text-xs font-bold text-slate-700 uppercase tracking-wider">Nueva Contraseña</label>
-                        <input
-                            type="password"
-                            value={nuevaContraseña}
-                            onChange={(e) => setNuevaContraseña(e.target.value)}
-                            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 transition"
-                            placeholder="••••••••"
-                            required
-                        />
+                        <div className="relative">
+                            <input
+                                type={mostrarNueva ? "text" : "password"}
+                                value={nuevaContraseña}
+                                onChange={(e) => setNuevaContraseña(e.target.value)}
+                                className="w-full rounded-lg border border-slate-300 pl-3 pr-16 py-2 text-sm text-slate-900 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 transition"
+                                placeholder="••••••••"
+                                required
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setMostrarNueva(!mostrarNueva)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold select-none"
+                            >
+                                {mostrarNueva ? "Ocultar" : "Mostrar"}
+                            </button>
+                        </div>
+
+                        {/* Lista dinámica de requisitos (Cambia a verde si se cumple) */}
+                        <div className="mt-3 p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-1.5 text-[11px] font-medium">
+                            <p className="font-bold text-slate-400 uppercase tracking-wider mb-1 text-[10px]">Requisitos de seguridad:</p>
+                            
+                            <div className="flex items-center gap-1.5 transition-colors">
+                                <span className={validaciones.longitud ? "text-green-600 font-bold" : "text-slate-400"}>
+                                    {validaciones.longitud ? "✓" : "○"} Mínimo 10 caracteres
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-1.5 transition-colors">
+                                <span className={validaciones.mayuscula ? "text-green-600 font-bold" : "text-slate-400"}>
+                                    {validaciones.mayuscula ? "✓" : "○"} Al menos una mayúscula
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-1.5 transition-colors">
+                                <span className={validaciones.numero ? "text-green-600 font-bold" : "text-slate-400"}>
+                                    {validaciones.numero ? "✓" : "○"} Al menos un número
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-1.5 transition-colors">
+                                <span className={validaciones.simbolo ? "text-green-600 font-bold" : "text-slate-400"}>
+                                    {validaciones.simbolo ? "✓" : "○"} Al menos un símbolo o especial
+                                </span>
+                            </div>
+                        </div>
                     </div>
 
+                    {/* Confirmar Contraseña con Mostrar/Ocultar */}
                     <div>
                         <label className="mb-1 block text-xs font-bold text-slate-700 uppercase tracking-wider">Confirmar Contraseña</label>
-                        <input
-                            type="password"
-                            value={confirmarContraseña}
-                            onChange={(e) => setConfirmarContraseña(e.target.value)}
-                            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 transition"
-                            placeholder="••••••••"
-                            required
-                        />
+                        <div className="relative">
+                            <input
+                                type={mostrarConfirmar ? "text" : "password"}
+                                value={confirmarContraseña}
+                                onChange={(e) => setConfirmarContraseña(e.target.value)}
+                                className="w-full rounded-lg border border-slate-300 pl-3 pr-16 py-2 text-sm text-slate-900 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 transition"
+                                placeholder="••••••••"
+                                required
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setMostrarConfirmar(!mostrarConfirmar)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold select-none"
+                            >
+                                {mostrarConfirmar ? "Ocultar" : "Mostrar"}
+                            </button>
+                        </div>
                     </div>
 
+                    {/* Botón de Envíos */}
                     <button
                         type="submit"
                         disabled={enviando || mensajeExito}
