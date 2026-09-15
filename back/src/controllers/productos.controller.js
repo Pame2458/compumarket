@@ -1,3 +1,4 @@
+import { Op } from 'sequelize';
 import Producto from '../models/productos.model.js';
 import Categoria from '../models/categorias.model.js';
 import Marca from '../models/marcas.model.js';
@@ -124,14 +125,97 @@ export const eliminar = async (req, res) => {
         res.status(500).json({ estado: false, error: error.message });
     }
 };
-// GET /productos/admin/todos -> lista TODOS los productos (cualquier estado), solo para el panel admin.
+
+// GET /productos/admin/todos -> lista TODOS los productos (cualquier estado),
+// solo para el panel admin, con:
+// - Paginación en servidor (limit y offset con findAndCountAll).
+// - Ordenamiento dinámico por columna y dirección (ASC/DESC).
+// - Búsqueda multi-campo en un solo término (nombre, sku, descripción).
+// - Filtros opcionales por idCategoria e idMarca.
+//
+// Reemplaza a la versión anterior de obtenerTodosAdmin (que hacía un
+// findAll simple sin filtros ni paginación). Se mantiene el mismo nombre
+// de función y la misma ruta para no romper lo que ya está conectado.
 export const obtenerTodosAdmin = async (req, res) => {
     try {
-        const data = await Producto.findAll({
-            include: [{ model: Marca }, { model: Categoria }]
+        console.log('[BACKEND] Parámetros de consulta recibidos en /productos/admin/todos:', req.query);
+
+        // =========================================================================
+        // 1. PAGINACIÓN DEL LADO DEL SERVIDOR (Server-Side Pagination)
+        // =========================================================================
+        const pagina = Math.max(1, parseInt(req.query.pagina, 10) || 1);
+        const limite = Math.max(1, parseInt(req.query.limite, 10) || 5);
+        const offset = (pagina - 1) * limite;
+
+        // =========================================================================
+        // 2. ORDENAMIENTO DINÁMICO (Dynamic Sorting)
+        // =========================================================================
+        // Lista blanca de columnas permitidas para evitar inyecciones SQL.
+        const columnasPermitidas = ['id', 'nombre', 'precio', 'stock'];
+        const ordenarPor = columnasPermitidas.includes(req.query.ordenarPor) ? req.query.ordenarPor : 'id';
+        const direccion = req.query.direccion?.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+        const order = [[ordenarPor, direccion]];
+
+        // =========================================================================
+        // 3. FILTROS Y BÚSQUEDA MULTI-CAMPO (Multi-field Search)
+        // =========================================================================
+        const where = {};
+
+        // Filtro específico por categoría
+        if (req.query.idCategoria && req.query.idCategoria.trim() !== '') {
+            where.idCategoria = parseInt(req.query.idCategoria, 10);
+        }
+
+        // Filtro específico por marca
+        if (req.query.idMarca && req.query.idMarca.trim() !== '') {
+            where.idMarca = parseInt(req.query.idMarca, 10);
+        }
+
+        // Búsqueda multi-campo: un solo término consulta simultáneamente
+        // por nombre, sku o descripción mediante Op.or y Op.like (%termino%)
+        const busqueda = req.query.busqueda?.trim();
+        if (busqueda) {
+            where[Op.or] = [
+                { nombre: { [Op.like]: `%${busqueda}%` } },
+                { sku: { [Op.like]: `%${busqueda}%` } },
+                { descripcion: { [Op.like]: `%${busqueda}%` } },
+            ];
+        }
+
+        // =========================================================================
+        // 4. CONSULTA CON findAndCountAll
+        // =========================================================================
+        // distinct: true garantiza que el conteo no se duplique al hacer JOIN
+        // con Categoria y Marca.
+        const { count, rows } = await Producto.findAndCountAll({
+            where,
+            include: [{ model: Marca }, { model: Categoria }],
+            order,
+            limit: limite,
+            offset: offset,
+            distinct: true,
         });
-        res.json({ estado: true, data });
+
+        const totalPaginas = Math.ceil(count / limite) || 1;
+
+        console.log(`[BACKEND] Total productos encontrados: ${count}. Enviando página ${pagina} de ${totalPaginas}`);
+
+        res.json({
+            estado: true,
+            data: {
+                productos: rows,
+                total: count,
+                pagina,
+                limite,
+                totalPaginas,
+            },
+        });
     } catch (error) {
-        res.status(500).json({ estado: false, mensaje: 'Error al obtener productos', error: error.message });
+        console.error('[BACKEND] Error al listar productos (admin):', error);
+        res.status(500).json({
+            estado: false,
+            mensaje: 'Error al listar productos',
+            error: error.message,
+        });
     }
 };

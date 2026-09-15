@@ -30,7 +30,7 @@ export const seedComputacion = async () => {
             email: 'soporte@hardware.com', 
             telefono: '11223344',
             direccion: 'Av. Tech 404', 
-            rolId: idRolAdmin,
+            rolId: rolAdmin.id,
         });
         console.log('🔹 Módulo 1 completado: Roles y Usuarios creados de forma segura.');
     } catch (error) {

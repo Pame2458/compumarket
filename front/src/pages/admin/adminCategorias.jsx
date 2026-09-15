@@ -119,9 +119,12 @@ function AdminCategorias() {
                 {!modoFormulario && (
                     <button
                         onClick={iniciarCreacion}
-                        className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-indigo-500"
+                        className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-500 hover:shadow"
                     >
-                        + Nueva categoría
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                        <span></span>
                     </button>
                 )}
             </div>
@@ -196,7 +199,6 @@ function AdminCategorias() {
                 <table className="w-full text-sm">
                     <thead className="bg-slate-50">
                         <tr>
-                            <th className="px-4 py-3 text-left font-semibold text-slate-700">ID</th>
                             <th className="px-4 py-3 text-left font-semibold text-slate-700">Nombre</th>
                             <th className="px-4 py-3 text-left font-semibold text-slate-700">Descripción</th>
                             <th className="px-4 py-3 text-right font-semibold text-slate-700">Acciones</th>
@@ -205,14 +207,13 @@ function AdminCategorias() {
                     <tbody className="divide-y divide-slate-100">
                         {categorias.length === 0 ? (
                             <tr>
-                                <td colSpan={4} className="px-4 py-8 text-center text-slate-500">
+                                <td colSpan={3} className="px-4 py-8 text-center text-slate-500">
                                     No hay categorías registradas.
                                 </td>
                             </tr>
                         ) : (
                             categorias.map((c) => (
-                                <tr key={c.id} className="hover:bg-slate-50">
-                                    <td className="px-4 py-3 text-slate-600">{c.id}</td>
+                                <tr >
                                     <td className="px-4 py-3 font-medium text-slate-900">{c.nombre}</td>
                                     <td className="px-4 py-3 text-slate-600">{c.descripcion || '-'}</td>
                                     <td className="px-4 py-3 text-right">

@@ -1,0 +1,30 @@
+Id,Descripción,Casuística/Datos de Entrada,Precondiciones,Prioridad,Tipo de Caso,Pasos a ejecutar,Resultado Esperado,Estado,Resultado Real/Obtenido,Post-condiciones,Requisito Funcional
+TC-LOGIN-001,Verificar inicio de sesión exitoso sin activar recordarme (Camino Feliz - Flujo Promesa Resuelta),"email='usuario@tecnico.com', password='ValidPassword123', recordarme=false",Componente renderizado. El mock/función 'login' de AuthContext resuelve la promesa exitosamente.,Alta,Caja Blanca / Funcional,"1. Completar campo email con 'usuario@tecnico.com'
+2. Completar campo password con 'ValidPassword123'
+3. Dejar el checkbox recordarme desmarcado.
+4. Disparar el evento onSubmit del formulario haciendo clic en 'Iniciar Sesión'.","Se llama a la función login con ('usuario@tecnico.com', 'ValidPassword123', false).
+El estado 'enviando' cambia a true durante la llamada y a false al finalizar.
+Se ejecuta navigate('/') redirigiendo a la raíz.",Pendiente,,Usuario redirigido a la página de inicio ('/').,RF-LOGIN-01
+TC-LOGIN-002,Verificar inicio de sesión exitoso activando la opción 'Recordarme',"email='usuario@tecnico.com', password='ValidPassword123', recordarme=true",Componente renderizado. Función 'login' configurada para resolver la promesa de manera exitosa.,Alta,Caja Blanca / Funcional,"1. Completar campo email.
+2. Completar campo password.
+3. Hacer clic en el checkbox 'Recordarme' (cambiar estado a true).
+4. Hacer clic en el botón 'Iniciar Sesión'.","Se invoca el método login de AuthContext enviando el argumento recordarme como true.
+Se ejecuta la navegación a '/' tras la resolución.",Pendiente,,Sesión iniciada guardando preferencia de persistencia.,RF-LOGIN-01
+TC-LOGIN-003,Validar control de errores preventivo cuando los campos de estado están vacíos (Bypass de validación HTML5),"email='', password=''","Componente renderizado. Se simula un bypass del atributo HTML5 'required' (por ejemplo, mediante envío programático del formulario).",Media,Caja Blanca / Validación Interna,"1. Mantener los estados de email y password vacíos.
+2. Ejecutar directamente la función handleSubmit del formulario.","La ejecución se detiene en la condición if (!email || !password).
+El estado error cambia a 'Por favor completá todos los campos.'.
+No se invoca la función login del contexto.",Pendiente,,Se muestra un bloque de alerta rojo con el mensaje de error definido. El loader de envío no se activa.,RF-LOGIN-02
+TC-LOGIN-004,Verificar la captura y renderizado de errores cuando la API/Contexto de Autenticación falla (Excepciones con err.message),"email='usuario@tecnico.com', password='WrongPassword123'",La función 'login' del AuthContext está mockeada para rechazar la promesa (throw new Error('Credenciales inválidas.')).,Alta,Caja Blanca / Manejo de Errores,"1. Introducir email y clave en los inputs.
+2. Presionar el botón 'Iniciar Sesión' para invocar handleSubmit.
+3. Esperar el rechazo (catch) de la promesa interna.","El bloque try/catch intercepta el error.
+El estado error se actualiza con el texto 'Credenciales inválidas.'.
+El bloque finally asegura que el estado 'enviando' regrese a false desbloqueando el botón.",Pendiente,,El formulario muestra la caja de alerta roja con el mensaje específico mapeado del objeto de error.,RF-LOGIN-03
+TC-LOGIN-005,Verificar la captura de errores genéricos cuando la promesa falla sin un mensaje explícito (Fallback de error),"email='usuario@tecnico.com', password='AnyPassword'",La función 'login' del AuthContext rechaza la promesa lanzando un objeto sin propiedad 'message' (ej. error de red plano).,Media,Caja Blanca / Manejo de Errores,"1. Introducir credenciales en los inputs.
+2. Presionar el botón de inicio de sesión.
+3. Capturar el flujo a través del bloque catch.","Al no existir err.message, el operador lógico || asigna el mensaje por defecto: 'Error al iniciar sesión. Verificá tus credenciales.'.
+El estado error toma este texto de fallback y lo renderiza en pantalla.",Pendiente,,Alerta de error genérica visualizada correctamente en la interfaz.,RF-LOGIN-03
+TC-LOGIN-006,Verificar el estado visual de deshabilitado y control del flag 'enviando' durante la espera asíncrona,"email='usuario@tecnico.com', password='ValidPassword123'",Función 'login' configurada para simular un retraso de red prolongado (ej. 3 segundos).,Media,Caja Blanca / UI State,"1. Completar campos válidos.
+2. Presionar el botón 'Iniciar Sesión'.
+3. Observar las propiedades del botón y el texto del mismo antes de que se resuelva la promesa.","El estado 'enviando' pasa a true de inmediato.
+El botón de tipo submit pasa a estar deshabilitado (disabled={true}).
+El texto del botón cambia dinámicamente de 'Iniciar Sesión →' a 'Iniciando sesión...'.",Pendiente,,El usuario no puede realizar múltiples clics que dupliquen la petición HTTP.,RF-LOGIN-04

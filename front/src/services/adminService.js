@@ -25,7 +25,9 @@ export const obtenerPerfilAdmin = async () => {
 
 // CRUD de administradores bajo /admin.
 // Los endpoints POST, PUT y DELETE están protegidos en el backend para rol ADMIN.
-export const listarAdministradores = async () => adminApi.get('/usuarios');
+// listarAdministradores recibe un objeto de parámetros (pagina, limite,
+// ordenarPor, direccion, busqueda, rolId) y lo pasa como query string.
+export const listarAdministradores = async (params = {}) => adminApi.get('/usuarios', { params });
 export const obtenerAdministradorPorId = async (id) => adminApi.get(`/usuarios/${id}`);
 export const crearAdministrador = async (datos) => adminApi.post('/usuarios', datos);
 export const actualizarAdministrador = async (id, datos) => adminApi.put(`/usuarios/${id}`, datos);
@@ -39,7 +41,11 @@ export const actualizarCategoria = async (id, datos) => adminApi.put(`/categoria
 export const eliminarCategoria = async (id) => adminApi.delete(`/categorias/${id}`);
 
 // --- CRUD de Productos (protegido, admin) ---
-export const listarProductosAdmin = async () => adminApi.get('/productos/admin/todos');
+// listarProductosAdmin recibe un objeto de parámetros (pagina, limite,
+// ordenarPor, direccion, busqueda, idCategoria, idMarca) y lo pasa como
+// query string a axios mediante { params }. Antes esta función no aceptaba
+// argumentos, por eso el backend recibía req.query vacío y nunca filtraba.
+export const listarProductosAdmin = async (params = {}) => adminApi.get('/productos/admin/todos', { params });
 export const crearProducto = async (datos) => adminApi.post('/productos', datos);
 export const actualizarProducto = async (id, datos) => adminApi.put(`/productos/${id}`, datos);
 export const eliminarProducto = async (id) => adminApi.delete(`/productos/${id}`);
