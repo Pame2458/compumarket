@@ -52,3 +52,5 @@ export const eliminarProducto = async (id) => adminApi.delete(`/productos/${id}`
 
 // --- Marcas (para el select del formulario de Productos) ---
 export const listarMarcasAdmin = async () => adminApi.get('/marcas');
+
+export const crearMarcaAdmin = async (nombre) => adminApi.post('/marcas', { nombre });

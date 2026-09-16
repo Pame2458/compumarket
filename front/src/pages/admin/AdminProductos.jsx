@@ -3,6 +3,7 @@
 // - Ordenamiento dinámico al hacer clic en las cabeceras de columnas.
 // - Búsqueda multi-campo (nombre, sku, descripción).
 // - Filtro selectivo por Categoría y por Marca.
+// - Alta rápida de nueva Marca desde el propio formulario de Producto.
 
 import { useEffect, useState, useCallback } from 'react';
 import {
@@ -12,6 +13,7 @@ import {
     eliminarProducto,
     listarCategoriasAdmin,
     listarMarcasAdmin,
+    crearMarcaAdmin,
 } from '../../services/adminService.js';
 
 const FORM_VACIO = {
@@ -51,6 +53,13 @@ function AdminProductos() {
     const [modoFormulario, setModoFormulario] = useState(false);
     const [editandoId, setEditandoId] = useState(null);
     const [form, setForm] = useState(FORM_VACIO);
+
+    // =========================================================================
+    // ESTADOS PARA ALTA RÁPIDA DE NUEVA MARCA (dentro del modal de Producto)
+    // =========================================================================
+    const [creandoMarca, setCreandoMarca] = useState(false);
+    const [nombreNuevaMarca, setNombreNuevaMarca] = useState('');
+    const [guardandoMarca, setGuardandoMarca] = useState(false);
 
     // =========================================================================
     // CARGA DE PRODUCTOS (server-side)
@@ -218,6 +227,9 @@ function AdminProductos() {
         setEditandoId(null);
         setForm(FORM_VACIO);
         setError('');
+        // Por si quedó a mitad de camino creando una marca nueva
+        setCreandoMarca(false);
+        setNombreNuevaMarca('');
     };
 
     const handleSubmit = async (e) => {
@@ -269,6 +281,39 @@ function AdminProductos() {
         } catch (err) {
             setError(err.message || 'Error al eliminar el producto.');
         }
+    };
+
+    // =========================================================================
+    // ALTA RÁPIDA DE MARCA (desde el select "+ Agregar nueva marca")
+    // =========================================================================
+    const handleSeleccionarMarca = (e) => {
+        if (e.target.value === '__nueva__') {
+            setCreandoMarca(true);
+        } else {
+            handleChange(e);
+        }
+    };
+
+    const handleGuardarNuevaMarca = async () => {
+        if (!nombreNuevaMarca.trim()) return;
+        setGuardandoMarca(true);
+        setError('');
+        try {
+            const nuevaMarca = await crearMarcaAdmin(nombreNuevaMarca.trim());
+            setMarcas((prev) => [...prev, nuevaMarca]);
+            setForm((prev) => ({ ...prev, idMarca: nuevaMarca.id }));
+            setCreandoMarca(false);
+            setNombreNuevaMarca('');
+        } catch (err) {
+            setError(err.message || 'Error al crear la marca.');
+        } finally {
+            setGuardandoMarca(false);
+        }
+    };
+
+    const handleCancelarNuevaMarca = () => {
+        setCreandoMarca(false);
+        setNombreNuevaMarca('');
     };
 
     // Cálculos para el texto de información de paginación
@@ -454,16 +499,55 @@ function AdminProductos() {
                                         ))}
                                     </select>
                                 </div>
+
+                                {/* Marca: select normal, o input de alta rápida si el usuario eligió "+ Agregar nueva marca" */}
                                 <div>
                                     <label className="mb-1 block text-sm font-medium text-slate-700">Marca *</label>
-                                    <select name="idMarca" value={form.idMarca} onChange={handleChange} required
-                                        className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                                        <option value="">Seleccionar marca</option>
-                                        {marcas.map((m) => (
-                                            <option key={m.id} value={m.id}>{m.nombre}</option>
-                                        ))}
-                                    </select>
+
+                                    {!creandoMarca ? (
+                                        <select
+                                            name="idMarca"
+                                            value={form.idMarca}
+                                            onChange={handleSeleccionarMarca}
+                                            required
+                                            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                        >
+                                            <option value="">Seleccionar marca</option>
+                                            {marcas.map((m) => (
+                                                <option key={m.id} value={m.id}>{m.nombre}</option>
+                                            ))}
+                                            <option value="__nueva__">+ Agregar nueva marca</option>
+                                        </select>
+                                    ) : (
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                autoFocus
+                                                value={nombreNuevaMarca}
+                                                onChange={(e) => setNombreNuevaMarca(e.target.value)}
+                                                placeholder="Nombre de la marca"
+                                                className="flex-1 rounded-lg border border-slate-300 px-3 py-2 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={handleGuardarNuevaMarca}
+                                                disabled={guardandoMarca}
+                                                className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-indigo-500 disabled:opacity-50"
+                                            >
+                                                {guardandoMarca ? '...' : 'OK'}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={handleCancelarNuevaMarca}
+                                                className="rounded-lg px-2 text-slate-400 hover:text-slate-600"
+                                                title="Cancelar"
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
+
                                 <div className="sm:col-span-2">
                                     <label className="mb-1 block text-sm font-medium text-slate-700">Imagen (URL) *</label>
                                     <input type="text" name="imagen" value={form.imagen} onChange={handleChange} required

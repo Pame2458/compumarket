@@ -99,16 +99,15 @@ export function AuthProvider({ children }) {
   };
 
   return (
+    
     <AuthContext.Provider value={value}>
-      {cargando ? (
-        <div className="flex min-h-screen items-center justify-center bg-slate-50 text-slate-400 font-bold text-xs uppercase tracking-widest animate-pulse">
-          Procesando transaccionalidad de cuenta...
-        </div>
-      ) : (
-        children
-      )}
+      { children}
     </AuthContext.Provider>
   );
+
+    
+  
+
 }
 // ... (Todo el código anterior del AuthProvider permanece exactamente igual)
 
