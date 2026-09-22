@@ -201,7 +201,7 @@ function AdminCategorias() {
                         <tr>
                             <th className="px-4 py-3 text-left font-semibold text-slate-700">Nombre</th>
                             <th className="px-4 py-3 text-left font-semibold text-slate-700">Descripción</th>
-                            <th className="px-4 py-3 text-right font-semibold text-slate-700">Acciones</th>
+                            <th className="px-4 py-3 text-center font-semibold text-slate-700">Acciones</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -213,16 +213,18 @@ function AdminCategorias() {
                             </tr>
                         ) : (
                             categorias.map((c) => (
-                                <tr >
+                                <tr key={c.id}>
                                     <td className="px-4 py-3 font-medium text-slate-900">{c.nombre}</td>
                                     <td className="px-4 py-3 text-slate-600">{c.descripcion || '-'}</td>
-                                    <td className="px-4 py-3 text-right">
-                                        <button onClick={() => iniciarEdicion(c)} className="mr-2 rounded-lg px-2 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50">
-                                            Editar
-                                        </button>
-                                        <button onClick={() => handleEliminar(c.id)} className="rounded-lg px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50">
-                                            Eliminar
-                                        </button>
+                                    <td className="px-4 py-3">
+                                        <div className="flex items-center justify-center gap-2">
+                                            <button onClick={() => iniciarEdicion(c)} className="rounded-lg px-2 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50">
+                                                Editar
+                                            </button>
+                                            <button onClick={() => handleEliminar(c.id)} className="rounded-lg px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50">
+                                                Eliminar
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))
