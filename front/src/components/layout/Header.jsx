@@ -1,7 +1,7 @@
-// Header.jsx es la cabecera del sitio compuMarket.
 import { useState, useRef, useEffect } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
+import log from "../assets/log.png";
 
 const subCategorias = [
     { to: '/productos', label: 'Todos los productos', end: true, desc: 'Ver todo nuestro stock de hardware' },
@@ -48,6 +48,11 @@ function Header() {
         <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur shadow-sm">
             <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
                 <NavLink to="/" className="flex items-center gap-1.5 text-lg font-black tracking-tight text-slate-900">
+                 <img 
+                 src={log} 
+                 alt="Logo CompuMarket" 
+                className="w-10 h-10 object-contain" 
+                />
                     compu<span className="text-red-600">Market</span>
                 </NavLink>
 
@@ -116,4 +121,5 @@ function Header() {
 }
 
 export default Header;
+
 

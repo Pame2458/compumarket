@@ -11,8 +11,6 @@ import {emisorDeCorreo} from './config/configuracionCorreo.js'; // Importación 
 import './models/index.js';
 // 🌟 IMPORTACIÓN DEL SEEDER DE COMPUTACIÓN
 import { seedComputacion } from './seeders/ecommerce.seeder.js';
-// ...
-// Descomentar UNA SOLA VEZ, correr, y volver a comentar:
 
 // Creamos la aplicación Express.
 const app = express();
@@ -53,20 +51,23 @@ const PUERTO = process.env.PORT || 3000;
 // Función que inicia el servidor una vez verificada la conexión con la base de datos.
 const iniciarServidor = async () => {
     try {
-        // Sincronización segura de la estructura de tablas en desarrollo diario
-        //await sequelize.sync({ force: true });
+        // Sincronización segura para el día a día: solo crea tablas que
+        // no existen, nunca borra ni altera las que ya están.
+        // (Si en algún momento necesitás reflejar un cambio de modelo en
+        // la DB, corré una vez sequelize.sync({ alter: true }) a mano y
+        // después volvé a dejar esta línea así.)
+        await sequelize.sync();
 
-       await sequelize.sync({ alter: true });
         console.log('Conexión a la base de datos establecida y tablas sincronizadas correctamente.');
-               // 🌟 EJECUCIÓN DEL SEEDER 
-   /* try{
-           
-         //   await seedComputacion();
-    }catch(error){
-        console.error('Error al ejecutar el seeder:', error);
-    }*/
+
+        // 🌟 EJECUCIÓN DEL SEEDER
+        /* try{
+            //   await seedComputacion();
+        }catch(error){
+            console.error('Error al ejecutar el seeder:', error);
+        }*/
+
         // app.listen() pone al servidor a escuchar peticiones en el puerto indicado.
-        // 🌟 CAMBIO 2: Agregamos la verificación explícita aquí adentro para ver si conecta el mail
         emisorDeCorreo.verify()
             .then(() => {
                 console.log('✅ El servidor de correos (Nodemailer) está conectado y listo.');
