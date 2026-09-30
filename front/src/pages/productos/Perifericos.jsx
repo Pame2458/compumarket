@@ -5,13 +5,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import api from '../../services/api'; // Asegúrate de que la ruta sea correcta según tu estructura de carpetas
 import ProductCard from '../../components/ProductCard';
+import { useCarrito } from '../../context/Carritocontext';
 
 function Perifericos() {
     const [productos, setProductos] = useState([]);
     const [marcas, setMarcas] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-
+    const { agregar } = useCarrito();
     // ---- Paginación, orden, búsqueda y filtro (server-side) ----
     const [pagina, setPagina] = useState(1);
     const [limite, setLimite] = useState(9);
@@ -72,7 +73,7 @@ function Perifericos() {
     }, [cargarPerifericos]);
 
     const handleAgregarAlCarrito = (producto) => {
-        console.log('Añadiendo a la tabla CarritoItem el producto ID:', producto.id);
+        agregar(producto);
     };
 
     const handleBusquedaChange = (e) => { setBusqueda(e.target.value); setPagina(1); };
