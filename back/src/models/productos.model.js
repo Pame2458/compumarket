@@ -36,8 +36,30 @@ const Producto = sequelize.define('Producto', {
             min: 0,
         }
     },
+    // La columna sigue siendo TEXT, pero el valor se maneja como una lista de imágenes:
+    // - set: guarda el array como texto JSON, por ejemplo '["/uploads/productos/1.jpg","/uploads/productos/2.jpg"]'
+    // - get: siempre devuelve un array. Los productos viejos con una URL suelta
+    //   (texto que no es JSON) se devuelven como un array de un solo elemento.
     imagen: {
         type: DataTypes.TEXT,
+        get() {
+            const raw = this.getDataValue('imagen');
+            if (!raw) return [];
+            try {
+                const parsed = JSON.parse(raw);
+                return Array.isArray(parsed) ? parsed : [raw];
+            } catch {
+                return [raw];
+            }
+        },
+        set(value) {
+            if (value === undefined || value === null || value === '') {
+                this.setDataValue('imagen', null);
+                return;
+            }
+            const lista = Array.isArray(value) ? value : [value];
+            this.setDataValue('imagen', JSON.stringify(lista));
+        },
     },
     peso: {
         type: DataTypes.INTEGER,

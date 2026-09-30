@@ -1,6 +1,7 @@
 // AdminCategorias.jsx - CRUD de categorías del catálogo.
 
 import { useEffect, useState } from 'react';
+import { Pencil, Trash2 } from "lucide-react";
 import {
     listarCategoriasAdmin,
     crearCategoria,
@@ -216,16 +217,24 @@ function AdminCategorias() {
                                 <tr key={c.id}>
                                     <td className="px-4 py-3 font-medium text-slate-900">{c.nombre}</td>
                                     <td className="px-4 py-3 text-slate-600">{c.descripcion || '-'}</td>
-                                    <td className="px-4 py-3">
-                                        <div className="flex items-center justify-center gap-2">
-                                            <button onClick={() => iniciarEdicion(c)} className="rounded-lg px-2 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50">
-                                                Editar
-                                            </button>
-                                            <button onClick={() => handleEliminar(c.id)} className="rounded-lg px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50">
-                                                Eliminar
-                                            </button>
-                                        </div>
-                                    </td>
+                                    <td className="px-4 py-3 text-center whitespace-nowrap">
+                                 <button
+                                      onClick={() => iniciarEdicion(c)}
+                                      title="Editar"
+                                      aria-label={`Editar ${c.nombre}`}
+                                      className="mr-1 rounded-lg p-2 text-indigo-600 transition hover:bg-indigo-50 hover:text-indigo-800"
+                                        >
+                                      <Pencil size={18} />
+                                 </button>
+                                 <button
+                                     onClick={() => handleEliminar(c.id)}
+                                     title="Eliminar"
+                                     aria-label={`Eliminar ${c.nombre}`}
+                                     className="rounded-lg p-2 text-red-600 transition hover:bg-red-50 hover:text-red-800"
+                                       >
+                                     <Trash2 size={18} />
+                                 </button>
+                                </td>
                                 </tr>
                             ))
                         )}

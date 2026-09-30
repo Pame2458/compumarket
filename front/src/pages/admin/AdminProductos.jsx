@@ -4,8 +4,10 @@
 // - Búsqueda multi-campo (nombre, sku, descripción).
 // - Filtro selectivo por Categoría y por Marca.
 // - Alta rápida de nueva Marca desde el propio formulario de Producto.
+// - Múltiples imágenes (multer): al editar se pueden quitar imágenes actuales y sumar nuevas.
 
 import { useEffect, useState, useCallback } from 'react';
+import { Pencil, Trash2 } from "lucide-react";
 import {
     listarProductosAdmin,
     crearProducto,
@@ -17,9 +19,34 @@ import {
 } from '../../services/adminService.js';
 
 const FORM_VACIO = {
-    sku: '', nombre: '', precio: '', stock: '', imagen: '',
+    sku: '', nombre: '', precio: '', stock: '',
     descripcion: '', idCategoria: '', idMarca: '',
 };
+
+// URL base del backend, donde multer guarda las imágenes (app.use('/uploads', ...)).
+// Ajustá el puerto al que use tu backend.
+const BASE_ARCHIVOS = 'http://localhost:3000';
+const MAX_IMAGENES = 5;
+const MAX_MB = 2;
+
+// El campo imagen normalmente es un array de rutas, pero por las dudas
+// (productos viejos) también se acepta un string.
+const obtenerImagenes = (imagen) => {
+    if (!imagen) return [];
+    if (Array.isArray(imagen)) return imagen;
+    if (typeof imagen === 'string') {
+        try {
+            const parsed = JSON.parse(imagen);
+            return Array.isArray(parsed) ? parsed : [imagen];
+        } catch {
+            return [imagen];
+        }
+    }
+    return [];
+};
+
+// Si la ruta ya es una URL completa (http...) se usa tal cual; si no, se le antepone el backend.
+const urlImagen = (ruta) => (ruta.startsWith('http') ? ruta : `${BASE_ARCHIVOS}${ruta}`);
 
 function AdminProductos() {
     // =========================================================================
@@ -53,6 +80,12 @@ function AdminProductos() {
     const [modoFormulario, setModoFormulario] = useState(false);
     const [editandoId, setEditandoId] = useState(null);
     const [form, setForm] = useState(FORM_VACIO);
+
+    // Imágenes: archivos nuevos elegidos, sus vistas previas y las que el producto ya tiene
+    // (imagenesActuales son las que se CONSERVAN: al quitar una con la ✕ se descarta al guardar).
+    const [archivos, setArchivos] = useState([]);
+    const [previews, setPreviews] = useState([]);
+    const [imagenesActuales, setImagenesActuales] = useState([]);
 
     // =========================================================================
     // ESTADOS PARA ALTA RÁPIDA DE NUEVA MARCA (dentro del modal de Producto)
@@ -115,6 +148,13 @@ function AdminProductos() {
     useEffect(() => {
         cargarProductos();
     }, [cargarProductos]);
+
+    // Genera las vistas previas de los archivos elegidos y libera la memoria al cambiar
+    useEffect(() => {
+        const urls = archivos.map((a) => URL.createObjectURL(a));
+        setPreviews(urls);
+        return () => urls.forEach((u) => URL.revokeObjectURL(u));
+    }, [archivos]);
 
     // =========================================================================
     // MANEJADORES DE ORDENAMIENTO (SORTING)
@@ -197,9 +237,45 @@ function AdminProductos() {
         setForm((prev) => ({ ...prev, [name]: value }));
     };
 
+    // Total de imágenes que tendría el producto si se guardara ahora
+    const totalImagenes = imagenesActuales.length + archivos.length;
+
+    // Suma las imágenes elegidas a las que ya estaban seleccionadas (no las reemplaza)
+    // y valida el total (actuales + nuevas) y el tamaño de cada archivo nuevo.
+    const handleArchivosChange = (e) => {
+        const nuevos = Array.from(e.target.files);
+
+        if (totalImagenes + nuevos.length > MAX_IMAGENES) {
+            setError(`Un producto puede tener hasta ${MAX_IMAGENES} imágenes en total.`);
+            e.target.value = '';
+            return;
+        }
+        if (nuevos.some((a) => a.size > MAX_MB * 1024 * 1024)) {
+            setError(`Cada imagen debe pesar como máximo ${MAX_MB} MB.`);
+            e.target.value = '';
+            return;
+        }
+
+        setError('');
+        setArchivos([...archivos, ...nuevos]);
+        e.target.value = ''; // permite volver a elegir el mismo archivo
+    };
+
+    // Quita una imagen nueva (todavía no subida) de las seleccionadas
+    const quitarArchivo = (indice) => {
+        setArchivos((prev) => prev.filter((_, i) => i !== indice));
+    };
+
+    // Quita una imagen que el producto ya tenía (se elimina recién al guardar)
+    const quitarImagenActual = (indice) => {
+        setImagenesActuales((prev) => prev.filter((_, i) => i !== indice));
+    };
+
     const iniciarCreacion = () => {
         setEditandoId(null);
         setForm(FORM_VACIO);
+        setArchivos([]);
+        setImagenesActuales([]);
         setModoFormulario(true);
         setError('');
         setMensaje('');
@@ -212,11 +288,12 @@ function AdminProductos() {
             nombre: producto.nombre || '',
             precio: producto.precio || '',
             stock: producto.stock || '',
-            imagen: producto.imagen || '',
             descripcion: producto.descripcion || '',
             idCategoria: producto.idCategoria || '',
             idMarca: producto.idMarca || '',
         });
+        setArchivos([]);
+        setImagenesActuales(obtenerImagenes(producto.imagen));
         setModoFormulario(true);
         setError('');
         setMensaje('');
@@ -226,6 +303,8 @@ function AdminProductos() {
         setModoFormulario(false);
         setEditandoId(null);
         setForm(FORM_VACIO);
+        setArchivos([]);
+        setImagenesActuales([]);
         setError('');
         // Por si quedó a mitad de camino creando una marca nueva
         setCreandoMarca(false);
@@ -237,19 +316,35 @@ function AdminProductos() {
         setError('');
         setMensaje('');
 
-        if (!form.nombre.trim() || !form.precio || !form.imagen.trim() || !form.idCategoria || !form.idMarca) {
-            setError('Nombre, precio, imagen, categoría y marca son obligatorios.');
+        if (!form.nombre.trim() || !form.precio || !form.idCategoria || !form.idMarca) {
+            setError('Nombre, precio, categoría y marca son obligatorios.');
+            return;
+        }
+        if (totalImagenes === 0) {
+            setError('El producto debe tener al menos una imagen.');
             return;
         }
 
         try {
-            const datos = {
-                ...form,
-                precio: Number(form.precio),
-                stock: Number(form.stock) || 0,
-                idCategoria: Number(form.idCategoria),
-                idMarca: Number(form.idMarca),
-            };
+            // Con archivos hay que enviar FormData (multipart) en lugar de JSON.
+            // Todos los campos viajan como texto; el backend los convierte a número.
+            const datos = new FormData();
+            datos.append('sku', form.sku);
+            datos.append('nombre', form.nombre);
+            datos.append('precio', Number(form.precio));
+            datos.append('stock', Number(form.stock) || 0);
+            datos.append('descripcion', form.descripcion);
+            datos.append('idCategoria', Number(form.idCategoria));
+            datos.append('idMarca', Number(form.idMarca));
+
+            // Al editar, se le indica al backend qué imágenes actuales se conservan
+            // (las que se quitaron con la ✕ no van en la lista y se eliminan).
+            if (editandoId) {
+                datos.append('imagenesConservar', JSON.stringify(imagenesActuales));
+            }
+
+            // "imagenes" es el nombre del campo que espera multer (uploadProductos.array('imagenes', 5))
+            archivos.forEach((archivo) => datos.append('imagenes', archivo));
 
             if (editandoId) {
                 await actualizarProducto(editandoId, datos);
@@ -548,12 +643,77 @@ function AdminProductos() {
                                     )}
                                 </div>
 
+                                {/* Imágenes: actuales (con ✕ para quitar) + nuevas (con vista previa) */}
                                 <div className="sm:col-span-2">
-                                    <label className="mb-1 block text-sm font-medium text-slate-700">Imagen (URL) *</label>
-                                    <input type="text" name="imagen" value={form.imagen} onChange={handleChange} required
-                                        placeholder="https://..."
-                                        className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+                                    <label className="mb-1 block text-sm font-medium text-slate-700">
+                                        Imágenes *
+                                        <span className="ml-1 text-xs font-normal text-slate-400">
+                                            (JPG, PNG o WEBP · máx. {MAX_IMAGENES} en total · {MAX_MB} MB c/u)
+                                        </span>
+                                    </label>
+                                    <input
+                                        type="file"
+                                        accept="image/jpeg,image/png,image/webp"
+                                        multiple
+                                        onChange={handleArchivosChange}
+                                        className="block w-full text-sm text-slate-600 file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-indigo-700 hover:file:bg-indigo-100"
+                                    />
+
+                                    <p className="mt-2 text-xs text-slate-500">
+                                        Total de imágenes: <strong className="text-slate-700">{totalImagenes}/{MAX_IMAGENES}</strong>
+                                    </p>
+
+                                    {/* Imágenes que el producto ya tiene */}
+                                    {imagenesActuales.length > 0 && (
+                                        <div className="mt-3">
+                                            <p className="mb-2 text-xs text-slate-500">
+                                                Imágenes actuales (usá la ✕ para quitar alguna):
+                                            </p>
+                                            <div className="flex flex-wrap gap-2">
+                                                {imagenesActuales.map((ruta, i) => (
+                                                    <div key={ruta + i} className="relative">
+                                                        <img src={urlImagen(ruta)} alt={`Imagen actual ${i + 1}`}
+                                                            className="h-20 w-20 rounded-lg border border-slate-200 object-cover" />
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => quitarImagenActual(i)}
+                                                            title="Quitar imagen"
+                                                            className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-xs text-white shadow hover:bg-red-500"
+                                                        >
+                                                            ✕
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Imágenes nuevas elegidas desde la computadora */}
+                                    {previews.length > 0 && (
+                                        <div className="mt-3">
+                                            <p className="mb-2 text-xs text-slate-500">
+                                                Imágenes nuevas (se suman al guardar):
+                                            </p>
+                                            <div className="flex flex-wrap gap-2">
+                                                {previews.map((src, i) => (
+                                                    <div key={i} className="relative">
+                                                        <img src={src} alt={`Vista previa ${i + 1}`}
+                                                            className="h-20 w-20 rounded-lg border border-indigo-200 object-cover" />
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => quitarArchivo(i)}
+                                                            title="Quitar"
+                                                            className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-xs text-white shadow hover:bg-red-500"
+                                                        >
+                                                            ✕
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
+
                                 <div className="sm:col-span-2">
                                     <label className="mb-1 block text-sm font-medium text-slate-700">Descripción</label>
                                     <textarea name="descripcion" value={form.descripcion} onChange={handleChange} rows={3}
@@ -624,29 +784,53 @@ function AdminProductos() {
                                     </td>
                                 </tr>
                             ) : (
-                                productos.map((p) => (
-                                    <tr key={p.id} className="transition-colors hover:bg-slate-50/80">
-                                        <td className="px-4 py-3 font-medium text-slate-900">{p.nombre}</td>
-                                        <td className="px-4 py-3 text-right text-slate-600">${p.precio}</td>
-                                        <td className="px-4 py-3 text-right text-slate-600">{p.stock}</td>
-                                        <td className="px-4 py-3 text-slate-600">{p.Categorium?.nombre || '-'}</td>
-                                        <td className="px-4 py-3">
-                                            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide ${
-                                                p.estado === 'activo' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'
-                                            }`}>
-                                                {p.estado}
-                                            </span>
-                                        </td>
-                                        <td className="px-4 py-3 text-right whitespace-nowrap">
-                                            <button onClick={() => iniciarEdicion(p)} className="mr-2 rounded-lg px-2.5 py-1 text-xs font-semibold text-indigo-600 transition hover:bg-indigo-50 hover:text-indigo-800">
-                                                Editar
-                                            </button>
-                                            <button onClick={() => handleEliminar(p.id)} className="rounded-lg px-2.5 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50 hover:text-red-800">
-                                                Eliminar
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))
+                                productos.map((p) => {
+                                    const primeraImagen = obtenerImagenes(p.imagen)[0];
+                                    return (
+                                        <tr key={p.id} className="transition-colors hover:bg-slate-50/80">
+                                            <td className="px-4 py-3 font-medium text-slate-900">
+                                                <div className="flex items-center gap-3">
+                                                    {primeraImagen && (
+                                                        <img
+                                                            src={urlImagen(primeraImagen)}
+                                                            alt={p.nombre}
+                                                            className="h-10 w-10 shrink-0 rounded-lg border border-slate-200 object-cover"
+                                                        />
+                                                    )}
+                                                    <span>{p.nombre}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-3 text-right text-slate-600">${p.precio}</td>
+                                            <td className="px-4 py-3 text-right text-slate-600">{p.stock}</td>
+                                            <td className="px-4 py-3 text-slate-600">{p.Categorium?.nombre || '-'}</td>
+                                            <td className="px-4 py-3">
+                                                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide ${
+                                                    p.estado === 'activo' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'
+                                                }`}>
+                                                    {p.estado}
+                                                </span>
+                                            </td>
+                                            <td className="px-4 py-3 text-right whitespace-nowrap">
+                                                <button
+                                                    onClick={() => iniciarEdicion(p)}
+                                                    title="Editar"
+                                                    aria-label={`Editar ${p.nombre}`}
+                                                    className="mr-1 rounded-lg p-2 text-indigo-600 transition hover:bg-indigo-50 hover:text-indigo-800"
+                                                >
+                                                    <Pencil size={18} />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleEliminar(p.id)}
+                                                    title="Eliminar"
+                                                    aria-label={`Eliminar ${p.nombre}`}
+                                                    className="rounded-lg p-2 text-red-600 transition hover:bg-red-50 hover:text-red-800"
+                                                >
+                                                    <Trash2 size={18} />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
                             )}
                         </tbody>
                     </table>

@@ -6,6 +6,11 @@
 
 import { adminApi } from './adminApi.js';
 
+// Configuración para requests con archivos (multipart). Sin esto, si adminApi
+// fija "application/json" por defecto, axios convierte el FormData a JSON
+// y las imágenes nunca llegan al backend.
+const multipart = { headers: { 'Content-Type': 'multipart/form-data' } };
+
 // POST /auth/admin/login -> Inicia sesión como administrador.
 // Recibe email y password del formulario y devuelve token + datos del usuario.
 export const loginAdmin = async (email, password) => {
@@ -43,14 +48,21 @@ export const eliminarCategoria = async (id) => adminApi.delete(`/categorias/${id
 // --- CRUD de Productos (protegido, admin) ---
 // listarProductosAdmin recibe un objeto de parámetros (pagina, limite,
 // ordenarPor, direccion, busqueda, idCategoria, idMarca) y lo pasa como
-// query string a axios mediante { params }. Antes esta función no aceptaba
-// argumentos, por eso el backend recibía req.query vacío y nunca filtraba.
+// query string a axios mediante { params }.
 export const listarProductosAdmin = async (params = {}) => adminApi.get('/productos/admin/todos', { params });
-export const crearProducto = async (datos) => adminApi.post('/productos', datos);
-export const actualizarProducto = async (id, datos) => adminApi.put(`/productos/${id}`, datos);
+
+// crearProducto y actualizarProducto reciben un FormData (con las imágenes),
+// por eso usan la configuración multipart.
+export const crearProducto = async (datos) => adminApi.post('/productos', datos, multipart);
+export const actualizarProducto = async (id, datos) => adminApi.put(`/productos/${id}`, datos, multipart);
 export const eliminarProducto = async (id) => adminApi.delete(`/productos/${id}`);
 
-// --- Marcas (para el select del formulario de Productos) ---
+// --- CRUD de Marcas (protegido, admin) ---
+// También se usa para el select de marcas del formulario de Productos.
 export const listarMarcasAdmin = async () => adminApi.get('/marcas');
+export const crearMarca = async (datos) => adminApi.post('/marcas', datos);
+export const actualizarMarca = async (id, datos) => adminApi.put(`/marcas/${id}`, datos);
+export const eliminarMarca = async (id) => adminApi.delete(`/marcas/${id}`);
 
+// Usada por el formulario de Productos para crear una marca rápida.
 export const crearMarcaAdmin = async (nombre) => adminApi.post('/marcas', { nombre });

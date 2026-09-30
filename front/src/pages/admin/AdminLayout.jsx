@@ -18,6 +18,7 @@ const menuItems = [
     { to: '/admin', label: 'Inicio', icon: '🏠' },
     { to: '/admin/usuarios', label: 'Administradores', icon: '👥' },
     { to: '/admin/categorias', label: 'Categorías', icon: '🏷️' },
+    { to: '/admin/marcas', label: 'Marcas', icon: '🏭' },
     { to: '/admin/productos', label: 'Productos', icon: '📦' },
 ];
 

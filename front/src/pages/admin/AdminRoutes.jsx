@@ -19,7 +19,7 @@ import AdminDashboard from './AdminDashboard.jsx';
 import AdminUsuarios from './AdminUsuarios.jsx';
 import AdminCategorias from './AdminCategorias.jsx';
 import AdminProductos from './AdminProductos.jsx';
-
+import AdminMarcas from './AdminMarcas.jsx';
 function AdminRoutes() {
     return (
         <Routes>
@@ -43,7 +43,8 @@ function AdminRoutes() {
                 {/* /admin/usuarios: CRUD de administradores */}
                 <Route path="usuarios" element={<AdminUsuarios />} />
                 <Route path="categorias" element={<AdminCategorias />} />
-                <Route path="productos" element={<AdminProductos />} /> 
+                <Route path="productos" element={<AdminProductos />} />
+                <Route path="marcas" element={<AdminMarcas />} />
             </Route>
         </Routes>
     );

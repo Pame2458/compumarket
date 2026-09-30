@@ -11,6 +11,7 @@ import {emisorDeCorreo} from './config/configuracionCorreo.js'; // Importación 
 import './models/index.js';
 // 🌟 IMPORTACIÓN DEL SEEDER DE COMPUTACIÓN
 import { seedComputacion } from './seeders/ecommerce.seeder.js';
+import path from 'path';
 
 // Creamos la aplicación Express.
 const app = express();
@@ -38,7 +39,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-
+app.use('/uploads', express.static(path.resolve('uploads')));
 // express.json() permite leer el cuerpo de las peticiones en formato JSON.
 app.use(express.json());
 

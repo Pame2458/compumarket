@@ -9,7 +9,7 @@ import Header from './components/layout/Header.jsx';
 import Footer from './components/layout/Footer.jsx';
 import Inicio from './pages/Inicio.jsx';
 import Empresa from './pages/Empresa.jsx';
-
+import ProductoDetalle from './pages/productos/ProductoDetalle.jsx';
 // Importaciones del catálogo corregidas (De Servicios a Productos)
 import Productos from './pages/Productos.jsx';
 import ProductosIndex from './pages/productos/ProductosIndex.jsx';
@@ -46,17 +46,19 @@ function App() {
               
               {/* Sistema de Catálogo Comercial mediante sub-rutas (Rutas Hijas) */}
               <Route path="/productos" element={<Productos />}>
+          
                 <Route index element={<ProductosIndex />} />
                 <Route path="hardware" element={<HardwareComponentes />} />
                 <Route path="perifericos" element={<Perifericos />} />
                 <Route path="laptops" element={<LaptopsNotebooks />} />
+                
               </Route>
               
               {/* Autenticación y Canales de Consulta */}
               <Route path="/contacto" element={<Contacto />} />
               <Route path="/login" element={<Login />} />
               <Route path="/registro" element={<Registro />} />
-              
+                  <Route path="/producto/:id" element={<ProductoDetalle />} />
               {/* 🌟 RUTAS PÚBLICAS DE GESTIÓN DE CREDENCIALES */}
               <Route path="/recuperar" element={<RecuperarPassword />} />
               <Route path="/restablecer-password" element={<RestablecerPassword />} />
