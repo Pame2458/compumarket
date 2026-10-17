@@ -17,9 +17,9 @@ import AdminLayout from './AdminLayout.jsx';
 import LoginAdmin from './LoginAdmin.jsx';
 import AdminDashboard from './AdminDashboard.jsx';
 import AdminUsuarios from './AdminUsuarios.jsx';
-import AdminCategorias from './AdminCategorias.jsx';
+import AdminCategorias from './adminCategorias.jsx';
 import AdminProductos from './AdminProductos.jsx';
-import AdminMarcas from './AdminMarcas.jsx';
+import AdminMarcas from './adminMarcas.jsx';
 function AdminRoutes() {
     return (
         <Routes>
