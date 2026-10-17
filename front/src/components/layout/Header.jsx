@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
 import log from "../assets/log.png";
-
+import { useCarrito } from '../../context/Carritocontext.jsx';
 const subCategorias = [
     { to: '/productos', label: 'Todos los productos', end: true, desc: 'Ver todo nuestro stock de hardware' },
     { to: '/productos/hardware', label: 'Hardware & Componentes', desc: 'Placas de video, procesadores y fuentes' },
@@ -17,6 +17,7 @@ function Header() {
     const location = useLocation();
 
     const { usuario, isAuthenticated, logout } = useAuth();
+    const { cantidadTotal, alternar } = useCarrito();
     const estaEnProductos = location.pathname.startsWith('/productos');
 
     // SOLUCIÓN SENIOR: Almacenamos la última ruta renderizada para cerrar los menús sincrónicamente
@@ -99,7 +100,22 @@ function Header() {
 
                     <NavLink to="/contacto" className={navClass}>Contacto</NavLink>
                     <div className="hidden md:block mx-2 h-5 w-px bg-slate-200" />
-
+                    <button
+    type="button"
+    onClick={alternar}
+    className="relative rounded-lg border border-slate-200 p-2 text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
+    title="Carrito"
+    aria-label="Abrir carrito"
+>
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+    </svg>
+    {cantidadTotal > 0 && (
+        <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold text-white">
+            {cantidadTotal}
+        </span>
+    )}
+</button>
                     {isAuthenticated ? (
                         <div className="flex flex-col md:flex-row items-center gap-3">
                             <NavLink to="/perfil" className={navClass}>Mi Perfil</NavLink>
@@ -112,7 +128,7 @@ function Header() {
                             <Link to="/registro" className="rounded-lg bg-red-600 px-3 py-2 text-sm font-bold text-white transition hover:bg-red-700 shadow-sm">Registrarse</Link>
                         </div>
                     )}
-
+                    
                     <NavLink to="/admin" className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-bold text-white hover:bg-slate-800 transition shadow-sm">Admin</NavLink>
                 </nav>
             </div>

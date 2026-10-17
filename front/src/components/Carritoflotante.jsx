@@ -2,11 +2,28 @@ import { useEffect } from "react";
 import { Minus, Plus, Trash2, X, ShoppingCart } from "lucide-react";
 import { useCarrito } from "../context/Carritocontext";
 
-// Mismo prefijo que uses en el detalle de producto (ej: "http://localhost:3000")
-const URL_IMAGENES = "";
+// Mismo prefijo que uses en el detalle de producto
+const URL_IMAGENES = "http://localhost:3000";
 
 const formatearPrecio = (n) =>
   n.toLocaleString("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 });
+
+// Toma la primera imagen, venga como array, como texto JSON o como un solo string.
+const primeraImagen = (imagen) => {
+  if (!imagen) return null;
+  let lista = imagen;
+  if (!Array.isArray(lista)) {
+    try {
+      lista = JSON.parse(lista);
+    } catch {
+      lista = [lista];
+    }
+  }
+  if (!Array.isArray(lista)) lista = [lista];
+  const ruta = lista[0];
+  if (!ruta) return null;
+  return ruta.startsWith("http") ? ruta : `${URL_IMAGENES}${ruta}`;
+};
 
 export default function CarritoFlotante({ onFinalizar }) {
   const { items, abierto, cerrar, sumar, restar, eliminar, vaciar, total, cantidadTotal } =
@@ -68,9 +85,9 @@ export default function CarritoFlotante({ onFinalizar }) {
             <ul className="flex-1 divide-y divide-slate-100 overflow-y-auto px-5">
               {items.map((item) => (
                 <li key={item.id} className="grid grid-cols-[64px_1fr_auto] gap-3 py-4">
-                  {item.imagen ? (
+                  {primeraImagen(item.imagen) ? (
                     <img
-                      src={`${URL_IMAGENES}${item.imagen}`}
+                      src={primeraImagen(item.imagen)}
                       alt={item.nombre}
                       className="h-16 w-16 rounded-lg border border-slate-100 object-cover"
                     />

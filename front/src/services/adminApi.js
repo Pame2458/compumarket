@@ -47,7 +47,7 @@ adminApi.interceptors.response.use(
         return response.data;
     },
     (error) => {
-        const message = error.response?.data?.mensaje || error.message;
+        const message = error.response?.data?.mensaje || error.response?.data?.error || error.message;
         console.error('[ADMIN] Error en la petición:', message);
         return Promise.reject(new Error(message));
     }

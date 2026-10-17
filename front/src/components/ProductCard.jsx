@@ -70,18 +70,25 @@ export default function ProductCard({ producto, onAgregarAlCarrito }) {
       </div>
 
       {/* Bloque de Compra con el Botón Rojo Corporativo */}
-      <div className="mt-2 pt-2 border-t border-slate-100">
-        <div className="text-lg font-black text-slate-900 mb-3">
-          ${Number(precio || 0).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-        </div>
-        <button
-          type="button"
-          onClick={() => onAgregarAlCarrito && onAgregarAlCarrito(producto)}
-          disabled={!stock || stock <= 0}
-          className="w-full bg-red-600 hover:bg-red-700 active:bg-red-800 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-bold py-2.5 px-4 rounded-xl transition-colors duration-150 shadow-sm text-xs uppercase tracking-wider"
-        >
-          {stock > 0 ? 'Agregar al Carrito' : 'Agotado'}
-        </button>
+      {/* Bloque de Compra: precio a la izquierda, botón a la derecha */}
+<div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between gap-3">
+  <div className="text-lg font-black text-slate-900">
+    ${Number(precio || 0).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+  </div>
+  <button
+    type="button"
+    onClick={() => onAgregarAlCarrito && onAgregarAlCarrito(producto)}
+    disabled={!stock || stock <= 0}
+    title={stock > 0 ? 'Agregar al carrito' : 'Agotado'}
+    aria-label={stock > 0 ? 'Agregar al carrito' : 'Agotado'}
+    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-600 text-white shadow-sm transition-colors duration-150 hover:bg-red-700 active:bg-red-800 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
+  >
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+    </svg>
+  </button>
+
+
       </div>
     </div>
   );

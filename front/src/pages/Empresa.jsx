@@ -43,7 +43,7 @@ function Empresa() {
                 <h2 className="mb-6 text-2xl font-black text-slate-900 tracking-tight">Equipo de Desarrollo</h2>
                 <div className="grid gap-4 sm:grid-cols-3">
                     <div className="rounded-xl bg-slate-50 border border-slate-100 p-4 text-center">
-                        <div className="font-bold text-slate-800 text-base">Julia Garrido</div>
+                        <div className="font-bold text-slate-800 text-base">Ana Ibarra</div>
                         <div className="text-xs text-red-600 font-semibold mt-1">Desarrolladora Full Stack</div>
                     </div>
                     <div className="rounded-xl bg-slate-50 border border-slate-100 p-4 text-center">

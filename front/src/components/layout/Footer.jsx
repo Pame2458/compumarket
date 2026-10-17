@@ -1,6 +1,14 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
 
+// Completá estos dos datos con los reales:
+// - WhatsApp: código de país + número, solo dígitos, sin +, espacios ni guiones (ej: 549XXXXXXXXXX para Argentina)
+// - Instagram: el usuario sin la @
+const WHATSAPP_NUMERO = '549XXXXXXXXXX';
+const WHATSAPP_TEXTO = 'Hola compuMarket, quisiera hacer una consulta.';
+const INSTAGRAM_USUARIO = 'compu_market';
+const EMAIL_CONTACTO = 'ventas@compumarket.com';
+
 function Footer() {
     const { user } = useAuth(); // Usamos 'user' para mantener la consistencia con el Header
     const anioActual = new Date().getFullYear();
@@ -96,8 +104,34 @@ function Footer() {
                         </h3>
                         <ul className="mt-3 space-y-2 text-sm text-slate-600">
                             <li className="font-semibold text-slate-800">Av. Cabildo 2500, CABA</li>
-                            <li>📧 ventas@compumarket.com</li>
-                            <li>📞 0800-444-HARDWARE</li>
+                            <li>
+                                <a
+                                    href={`mailto:${EMAIL_CONTACTO}`}
+                                    className="transition hover:text-red-600"
+                                >
+                                    📧 {EMAIL_CONTACTO}
+                                </a>
+                            </li>
+                            <li>
+                                <a
+                                    href={`https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(WHATSAPP_TEXTO)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="transition hover:text-red-600"
+                                >
+                                    📞 WhatsApp: +{WHATSAPP_NUMERO}
+                                </a>
+                            </li>
+                            <li>
+                                <a
+                                    href={`https://instagram.com/${INSTAGRAM_USUARIO}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="transition hover:text-red-600"
+                                >
+                                    📸 Instagram: @{INSTAGRAM_USUARIO}
+                                </a>
+                            </li>
                             <li className="text-xs text-slate-400 mt-1">Lun a Vie: 9 a 18 hs | Sáb: 9 a 13 hs</li>
                         </ul>
                     </div>
@@ -113,4 +147,3 @@ function Footer() {
 }
 
 export default Footer;
-
