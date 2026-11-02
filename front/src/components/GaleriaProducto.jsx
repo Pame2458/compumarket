@@ -9,13 +9,19 @@ const BASE_ARCHIVOS = 'http://localhost:3000';
 // viejos pueden tener un string (URL). Esto cubre ambos casos.
 const aArray = (imagen) => {
     if (!imagen) return [];
-    if (Array.isArray(imagen)) return imagen;
-    try {
-        const parsed = JSON.parse(imagen);
-        return Array.isArray(parsed) ? parsed : [imagen];
-    } catch {
-        return [imagen];
+    // Si Sequelize ya lo devolvió como Array de JavaScript, lo usamos directamente
+    if (Array.isArray(imagen)) return imagen; 
+    
+    // Si viene como string de texto, intentamos parsearlo
+    if (typeof imagen === 'string') {
+        try {
+            const parsed = JSON.parse(imagen);
+            return Array.isArray(parsed) ? parsed : [imagen];
+        } catch {
+            return [imagen];
+        }
     }
+    return [imagen];
 };
 
 // Si la ruta ya es una URL completa se usa tal cual; si no, se le antepone el backend.

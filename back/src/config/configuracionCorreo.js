@@ -17,3 +17,22 @@ emisorDeCorreo.verify().then(() => {
 }).catch((errorDeConexion) => {
     console.error('❌ Hubo un error de conexión segura:', errorDeConexion);
 });
+
+// Envía un mail usando el emisorDeCorreo de arriba.
+// Devuelve true si se envió y false si falló, así un error de mail
+// nunca rompe la confirmación del pedido.
+export const enviarCorreo = async (destinatario, asunto, cuerpoHtml) => {
+    try {
+        const info = await emisorDeCorreo.sendMail({
+            from: `"compuMarket" <${process.env.CORREO_EMISOR}>`,
+            to: destinatario,
+            subject: asunto,
+            html: cuerpoHtml,
+        });
+        console.log('📧 Correo enviado a ' + destinatario + ', id: ' + info.messageId);
+        return true;
+    } catch (error) {
+        console.error('⚠️ Error al enviar correo a ' + destinatario + ':', error.message);
+        return false;
+    }
+};

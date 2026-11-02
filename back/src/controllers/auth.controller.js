@@ -254,7 +254,7 @@ export const resetPassword = async (req, res) => {
         }
 
         // 🌟 CAMBIO REALIZADO: Validación estricta sincronizada con el Frontend de React
-        const expresionPassword = /^(?=.[A-Z])(?=.\d)(?=.*[^A-Za-z0-9]).{10,}$/;
+        const expresionPassword = /^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{10,}$/;
         if (!expresionPassword.test(password)) {
             return res.status(400).json({ 
                 estado: false, 

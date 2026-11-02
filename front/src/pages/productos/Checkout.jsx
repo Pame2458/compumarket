@@ -1,9 +1,11 @@
-// Checkout.jsx - Página de finalizar compra (paso 1: resumen del pedido).
+// Checkout.jsx - Página de finalizar compra (resumen del pedido y confirmación).
 
-import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart } from 'lucide-react';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { ShoppingCart, CheckCircle } from 'lucide-react';
 import { useCarrito } from '../../context/Carritocontext';
 import { useAuth } from '../../context/AuthContext.jsx';
+import { postConfirmarPedido } from '../../services/checkoutService.js';
 
 const URL_IMAGENES = 'http://localhost:3000';
 
@@ -28,9 +30,51 @@ const primeraImagen = (imagen) => {
 };
 
 function Checkout() {
-    const { items, total, cantidadTotal } = useCarrito();
-    const { user } = useAuth(); // null si el cliente no inició sesión
-    const navigate = useNavigate();
+    const { items, total, cantidadTotal, vaciar } = useCarrito();
+    const { usuario } = useAuth(); // null si el cliente no inició sesión
+
+    const [cargando, setCargando] = useState(false);
+    const [error, setError] = useState('');
+    const [pedidoConfirmado, setPedidoConfirmado] = useState(null);
+
+    // Convierte el carrito en un pedido guardado en la base de datos.
+    const handleConfirmar = async () => {
+        setCargando(true);
+        setError('');
+        try {
+            // Mandamos solo id y cantidad: el precio lo toma el backend de la base.
+            const data = await postConfirmarPedido({
+                items: items.map((item) => ({ id: item.id, cantidad: item.cantidad })),
+            });
+            setPedidoConfirmado({ id: data.pedidoId, total: data.total });
+            vaciar();
+        } catch (err) {
+            console.error(err);
+            setError(err.response?.data?.message || 'No pudimos procesar tu pedido. Probá de nuevo.');
+        } finally {
+            setCargando(false);
+        }
+    };
+
+    // Pantalla de éxito (va antes del "carrito vacío" porque el carrito ya se vació).
+    if (pedidoConfirmado) {
+        return (
+            <div className="mx-auto flex max-w-3xl flex-col items-center gap-4 px-4 py-20 text-center">
+                <CheckCircle size={56} className="text-green-600" />
+                <h1 className="text-3xl font-black tracking-tight text-slate-900">¡Pedido confirmado!</h1>
+                <p className="text-slate-600">
+                    Tu pedido <strong>#{pedidoConfirmado.id}</strong> quedó registrado por un total de{' '}
+                    <strong>{formatearPrecio(Number(pedidoConfirmado.total))}</strong>.
+                </p>
+                <Link
+                    to="/productos"
+                    className="rounded-xl bg-red-600 px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-red-700"
+                >
+                    Seguir comprando
+                </Link>
+            </div>
+        );
+    }
 
     if (items.length === 0) {
         return (
@@ -92,22 +136,33 @@ function Checkout() {
                 </div>
             </div>
 
-            {/* Acceso: si no hay sesión, pedir login o registro; si hay, seguir al pago */}
-            {user ? (
-                <div className="mt-6 flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                        <p className="text-sm font-bold text-slate-900">
-                            Comprando como {user.nombre || user.email}
-                        </p>
-                        <p className="text-xs text-slate-500">Todo listo para continuar con el pago.</p>
+            {/* Acceso: si no hay sesión, pedir login o registro; si hay, confirmar el pedido */}
+            {usuario ? (
+                <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <p className="text-sm font-bold text-slate-900">
+                                Comprando como {usuario.nombre || usuario.email}
+                            </p>
+                            <p className="text-xs text-slate-500">Revisá el resumen y confirmá tu pedido.</p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={handleConfirmar}
+                            disabled={cargando}
+                            className={`rounded-xl px-6 py-3 text-sm font-bold text-white transition-colors ${
+                                cargando ? 'cursor-not-allowed bg-slate-400' : 'bg-red-600 hover:bg-red-700'
+                            }`}
+                        >
+                            {cargando ? 'Procesando tu pedido...' : 'Confirmar pedido'}
+                        </button>
                     </div>
-                    <button
-                        type="button"
-                        onClick={() => navigate('/pago')}
-                        className="rounded-xl bg-red-600 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-red-700"
-                    >
-                        Continuar al pago
-                    </button>
+
+                    {error && (
+                        <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-center text-xs font-bold text-red-600">
+                            {error}
+                        </p>
+                    )}
                 </div>
             ) : (
                 <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">

@@ -1,4 +1,4 @@
- 'dotenv/config';
+import 'dotenv/config';
 
 import express from "express";
 import cors from "cors";
@@ -6,11 +6,13 @@ import cors from "cors";
 import router from './routes/index.js'; 
 import sequelize from './config/database.js';
 import {emisorDeCorreo} from './config/configuracionCorreo.js'; // Importación del archivo de configuración de correo   
-
+import checkoutRoutes from './routes/checkout.routes.js';
 // Importamos el índice de modelos para que Sequelize registre las asociaciones del DER.
 import './models/index.js';
 // 🌟 IMPORTACIÓN DEL SEEDER DE COMPUTACIÓN
 import { seedComputacion } from './seeders/ecommerce.seeder.js';
+// 🌟 IMPORTACIÓN DEL SEEDER DE PEDIDO DE PRUEBA
+import { seedPedidoPrueba } from './seeders/pedidos.seeder.js';
 import path from 'path';
 
 // Creamos la aplicación Express.
@@ -45,7 +47,7 @@ app.use(express.json());
 
 // Asociamos el enrutador central de la API bajo el prefijo ordenado '/api'
 app.use('/api', router);
-
+app.use('/api', checkoutRoutes);
 // El puerto se lee de una variable de entorno o, si no existe, usamos 3000.
 const PUERTO = process.env.PORT || 3000;
 
@@ -67,6 +69,13 @@ const iniciarServidor = async () => {
         }catch(error){
             console.error('Error al ejecutar el seeder:', error);
         }*/
+
+        // 🌟 SEEDER DE PEDIDO DE PRUEBA (borrar este bloque cuando Moni tenga el checkout)
+        try {
+            await seedPedidoPrueba();
+        } catch (error) {
+            console.error('Error al ejecutar el seeder de pedido de prueba:', error);
+        }
 
         // app.listen() pone al servidor a escuchar peticiones en el puerto indicado.
       emisorDeCorreo.verify()

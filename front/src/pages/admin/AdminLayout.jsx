@@ -20,8 +20,8 @@ const menuItems = [
     { to: '/admin/categorias', label: 'Categorías', icon: '🏷️' },
     { to: '/admin/marcas', label: 'Marcas', icon: '🏭' },
     { to: '/admin/productos', label: 'Productos', icon: '📦' },
+    { to: '/admin/pedidos', label: 'Pedidos', icon: '🧾' },
 ];
-
 function AdminLayout() {
     const { admin, logout, esAdmin, esOperador, puedeEscribir, cargando } = useAdminAuth();
     const navigate = useNavigate();

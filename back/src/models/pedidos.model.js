@@ -13,12 +13,16 @@ const Pedido = sequelize.define('Pedido', {
         allowNull: false,
     },
     estado: {
-        type: DataTypes.ENUM('pendiente', 'procesando', 'completado', 'cancelado'),
+        type: DataTypes.ENUM('pendiente', 'en_preparacion', 'enviado', 'entregado', 'cancelado'),
         defaultValue: 'pendiente',
     },
     total: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
+    },
+    fecha: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW,
     }
 }, {
     tableName: 'pedidos',

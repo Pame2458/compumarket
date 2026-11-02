@@ -66,3 +66,12 @@ export const eliminarMarca = async (id) => adminApi.delete(`/marcas/${id}`);
 
 // Usada por el formulario de Productos para crear una marca rápida.
 export const crearMarcaAdmin = async (nombre) => adminApi.post('/marcas', { nombre });
+
+// --- Gestión de Pedidos (protegido, admin) ---
+// listarPedidosAdmin recibe un objeto de parámetros (pagina, limite) y lo pasa
+// como query string. El backend devuelve { pedidos, total, pagina, limite, totalPaginas }.
+export const listarPedidosAdmin = async (params = {}) => adminApi.get('/admin/pedidos', { params });
+
+// actualizarEstadoPedido cambia el estado de un pedido
+// (pendiente, en_preparacion, enviado, entregado o cancelado).
+export const actualizarEstadoPedido = async (id, estado) => adminApi.put(`/admin/pedidos/${id}/estado`, { estado });
