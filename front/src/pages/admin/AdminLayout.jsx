@@ -16,10 +16,13 @@ import { useAdminAuth } from '../../context/AdminAuthContext.jsx';
 
 const menuItems = [
     { to: '/admin', label: 'Inicio', icon: '🏠' },
-    { to: '/admin/usuarios', label: 'Administradores', icon: '👥' },
+    { to: '/admin/usuarios', label: 'Usuarios', icon: '👥' },
+    { to: '/admin/clientes', label: 'Clientes', icon: '🛍️' }, // NUEVA
     { to: '/admin/categorias', label: 'Categorías', icon: '🏷️' },
     { to: '/admin/marcas', label: 'Marcas', icon: '🏭' },
     { to: '/admin/productos', label: 'Productos', icon: '📦' },
+    { to: '/admin/pedidos', label: 'Pedidos', icon: '🧾' },
+    { to: '/admin/resenas', label: 'Reseñas', icon: '⭐' },
 ];
 
 function AdminLayout() {

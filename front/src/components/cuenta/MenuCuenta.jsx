@@ -4,6 +4,7 @@ import { NavLink } from 'react-router-dom';
 const pestanas = [
     { to: '/perfil', etiqueta: 'Mis datos' },
     { to: '/mis-pedidos', etiqueta: 'Mis pedidos' },
+    { to: '/mis-resenas', etiqueta: 'Mis reseñas' }, // NUEVA
 ];
 
 function MenuCuenta() {

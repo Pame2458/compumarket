@@ -287,7 +287,7 @@ function AdminUsuarios() {
             {/* Encabezado y botón nuevo */}
             <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
                 <div>
-                    <h2 className="text-2xl font-bold text-slate-900">Administradores</h2>
+                    <h2 className="text-2xl font-bold text-slate-900">Usuarios</h2>
                     <p className="text-sm text-slate-600">
                         {puedeEscribir
                             ? 'Gestioná los usuarios con paginación en servidor, orden dinámico y búsqueda multi-campo.'

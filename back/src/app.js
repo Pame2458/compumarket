@@ -65,19 +65,19 @@ const iniciarServidor = async () => {
 
         console.log('Conexión a la base de datos establecida y tablas sincronizadas correctamente.');
 
-        // 🌟 EJECUCIÓN DEL SEEDER
-        /* try{
-            //   await seedComputacion();
-        }catch(error){
-            console.error('Error al ejecutar el seeder:', error);
-        }*/
+        // CAMBIO: seed ACTIVADO (se corre una sola vez; después se vuelve a comentar)
+       // try {
+       //     await seedComputacion();
+       // } catch (error) {
+       //     console.error('Error al ejecutar el seeder:', error);
+       // }
 
-        // 🌟 SEEDER DE PEDIDO DE PRUEBA (borrar este bloque cuando Moni tenga el checkout)
-        try {
+        // CAMBIO: seeder de pedido de prueba APAGADO (ya no hace falta, el checkout está listo)
+        /* try {
             await seedPedidoPrueba();
         } catch (error) {
             console.error('Error al ejecutar el seeder de pedido de prueba:', error);
-        }
+        } */
 
         // app.listen() pone al servidor a escuchar peticiones en el puerto indicado.
       emisorDeCorreo.verify()

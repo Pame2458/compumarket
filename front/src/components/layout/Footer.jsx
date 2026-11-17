@@ -48,7 +48,7 @@ function FooterLink({ to, children, admin = false, icono = '→' }) {
 }
 
 function Footer() {
-    const { user } = useAuth();
+    const { usuario, isAuthenticated } = useAuth();
     const anioActual = new Date().getFullYear();
 
     return (
@@ -82,8 +82,8 @@ function Footer() {
                     <div>
                         <h3 className={tituloColumna}>Navegación</h3>
                         <ul className="space-y-1.5 text-sm font-medium">
-                            {user ? (
-                                <FooterLink to="/perfil">Mi Panel de Cuenta</FooterLink>
+                            {isAuthenticated ? (
+                                <FooterLink to="/perfil">Mi Cuenta</FooterLink>
                             ) : (
                                 <>
                                     <FooterLink to="/login">Iniciar Sesión</FooterLink>
@@ -91,7 +91,7 @@ function Footer() {
                                 </>
                             )}
                             <FooterLink to="/empresa">Sobre Nosotros</FooterLink>
-                            {user?.rol === 'admin' && (
+                            {isAuthenticated && usuario?.rol === 'admin' && (
                                 <FooterLink to="/admin" admin icono="⚡">
                                     Consola de Administrador
                                 </FooterLink>

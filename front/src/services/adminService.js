@@ -39,6 +39,18 @@ export const actualizarAdministrador = async (id, datos) => adminApi.put(`/usuar
 export const eliminarAdministrador = async (id) => adminApi.delete(`/usuarios/${id}`);
 export const listarRolesAdmin = async () => adminApi.get('/roles');
 
+// --- Consulta de Clientes (protegido, admin, solo lectura) ---
+// listarClientesAdmin recibe { pagina, limite, ordenarPor, direccion, busqueda }.
+// El backend devuelve { clientes, total, pagina, limite, totalPaginas }.
+export const listarClientesAdmin = async (params = {}) => {
+    return adminApi.get('/admin/clientes', { params });
+};
+
+// Historial de pedidos de un cliente. Devuelve { pedidos: [...] }.
+export const listarPedidosDeCliente = async (id) => {
+    return adminApi.get(`/admin/clientes/${id}/pedidos`);
+};
+
 // --- CRUD de Categorías (protegido, admin) ---
 export const listarCategoriasAdmin = async () => adminApi.get('/categorias');
 export const crearCategoria = async (datos) => adminApi.post('/categorias', datos);
@@ -75,3 +87,18 @@ export const listarPedidosAdmin = async (params = {}) => adminApi.get('/admin/pe
 // actualizarEstadoPedido cambia el estado de un pedido
 // (pendiente, en_preparacion, enviado, entregado o cancelado).
 export const actualizarEstadoPedido = async (id, estado) => adminApi.put(`/admin/pedidos/${id}/estado`, { estado });
+
+// --- Moderación de Reseñas (protegido, admin) ---
+// listarCalificacionesAdmin recibe { estado, pagina, limite } (estado: pendiente, aprobada o rechazada)
+// y devuelve { resenas, total, pagina, limite, totalPaginas }.
+export const listarCalificacionesAdmin = async (params = {}) => adminApi.get('/admin/calificaciones', { params });
+
+// moderarCalificacionAdmin aprueba o rechaza un comentario.
+// Para rechazar hay que mandar el motivo: ofensivo, spam o no_relacionado.
+export const moderarCalificacionAdmin = async (id, estado, motivoRechazo) =>
+    adminApi.put(`/admin/calificaciones/${id}/moderar`, { estado, motivoRechazo });
+
+// --- Estadísticas de ventas (protegido, admin) ---
+// obtenerEstadisticasAdmin recibe { desde, hasta } (opcionales, formato AAAA-MM-DD)
+// y devuelve { totalVentas, cantidadPedidos, masVendidos }.
+export const obtenerEstadisticasAdmin = async (params = {}) => adminApi.get('/admin/estadisticas', { params });

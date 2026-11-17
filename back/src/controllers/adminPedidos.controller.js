@@ -57,6 +57,56 @@ const notificarCambioEstado = async (pedido, nuevoEstado) => {
     }
 };
 
+// NUEVO: segundo correo, solo cuando el pedido pasa a "entregado".
+// Invita al cliente a calificar los productos y lo lleva a Mi Cuenta > Mis reseñas.
+const notificarCalificacion = async (pedido) => {
+    try {
+        const cliente = await Cliente.findByPk(pedido.idCliente);
+        if (!cliente || !cliente.email) return;
+
+        // Nombres de los productos del pedido, para mostrarlos en el correo
+        const detalles = await DetallePedido.findAll({ where: { idPedido: pedido.id } });
+        const productos = detalles.length
+            ? await Producto.findAll({ where: { id: { [Op.in]: detalles.map((d) => d.idProducto) } } })
+            : [];
+        const listaProductos = productos
+            .map((p) => `<li style="margin-bottom: 4px;">${p.nombre}</li>`)
+            .join('');
+
+        const urlFront = process.env.URL_FRONTEND || 'http://localhost:5173';
+        const enlaceResenas = `${urlFront}/mis-resenas`;
+
+        await emisorDeCorreo.sendMail({
+            from: `"compuMarket 🛒" <${process.env.CORREO_EMISOR}>`,
+            to: cliente.email,
+            subject: `¿Qué te pareció tu compra? - Pedido #${pedido.id}`,
+            html: `
+                <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+                    <h2 style="color: #dc2626; font-weight: 900; margin-bottom: 5px;">compuMarket</h2>
+                    <h3 style="color: #0f172a; margin-top: 0; font-size: 16px;">¿Qué te pareció tu compra?</h3>
+                    <p style="color: #475569; font-size: 14px; line-height: 1.5;">
+                        Hola, ${cliente.nombre}. Tu opinión ayuda a otros clientes a elegir mejor.
+                        Calificá de 1 a 5 estrellas los productos de tu pedido #${pedido.id}:
+                    </p>
+                    <ul style="color: #0f172a; font-size: 14px; padding-left: 20px;">
+                        ${listaProductos}
+                    </ul>
+                    <div style="text-align: center; margin: 25px 0;">
+                        <a href="${enlaceResenas}" style="background-color: #dc2626; color: white; padding: 12px 24px; text-decoration: none; font-weight: bold; border-radius: 8px; font-size: 14px; display: inline-block;">
+                            Calificar mis productos
+                        </a>
+                    </div>
+                    <p style="color: #94a3b8; font-size: 11px;">
+                        Tendrás que iniciar sesión para calificar. Si no lo hacés ahora, podés hacerlo cuando quieras desde Mi Cuenta.
+                    </p>
+                </div>
+            `,
+        });
+    } catch (error) {
+        console.error('Error al enviar correo para calificar:', error);
+    }
+};
+
 // GET /api/admin/pedidos?pagina=1&limite=5&estado=pendiente&busqueda=juan
 // Lista pedidos paginados, con filtro por estado y búsqueda por número de
 // pedido o por nombre, apellido o email del cliente.
@@ -171,7 +221,14 @@ export const actualizarEstadoPedido = async (req, res) => {
         // Solo se notifica si el estado realmente cambió.
         // No usamos await: la respuesta al admin no espera al correo.
         if (estadoAnterior !== estado) {
-            notificarCambioEstado(pedido, estado);
+            // CAMBIO: primero sale el correo del cambio de estado y, cuando termina,
+            // si el pedido quedó "entregado", sale el segundo para calificar.
+            // (notificarCambioEstado nunca lanza error: lo captura adentro.)
+            notificarCambioEstado(pedido, estado).then(() => {
+                if (estado === 'entregado') {
+                    notificarCalificacion(pedido);
+                }
+            });
         }
 
         return res.json({ estado: true, mensaje: 'Estado actualizado', pedido });

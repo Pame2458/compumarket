@@ -1,17 +1,34 @@
 // LaptopsNotebooks.jsx - Sección de Laptops y Notebooks de Élite para compuMarket.
 // Consulta dinámicamente el backend filtrando por la categoría correspondiente del DER.
-// Ahora con paginación, orden, búsqueda y filtro por marca (server-side), igual que en AdminProductos.
+// Con paginación, orden, búsqueda y filtro por marca (server-side). Estilos 100% Tailwind,
+// con la misma paleta que ProductosIndex (azul oscuro, texto negro en títulos, botones rojos).
 
 import { useState, useEffect, useCallback } from 'react';
 import api from '../../services/api'; // Asegúrate de que la ruta sea correcta según tu estructura de carpetas
-import ProductCard from '../../components/ProductCard'; // Componente para mostrar cada producto
+import ProductCard from '../../components/ProductCard';
 import { useCarrito } from '../../context/Carritocontext';
+
+// Estilos compartidos (misma paleta que ProductosIndex)
+const filtrosBox =
+    'rounded-2xl border border-red-500/[.35] bg-slate-950 shadow-[0_12px_30px_rgba(2,6,23,0.55),0_0_20px_rgba(220,38,38,0.12)] transition-all duration-300 hover:border-red-500/[.65]';
+
+const inputGamer =
+    'border border-slate-800 bg-slate-900 text-white transition-all duration-300 placeholder:text-slate-500 focus:border-red-500 focus:bg-[#131c31] focus:shadow-[0_0_15px_rgba(239,68,68,0.4)] focus:outline-none [&_option]:bg-slate-950 [&_option]:text-white';
+
+const botonPagina =
+    'rounded-lg border px-3 py-1.5 text-xs transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40';
+const botonPaginaNormal =
+    'border-slate-800 bg-slate-950 font-semibold text-slate-300 enabled:hover:-translate-y-px enabled:hover:border-red-500 enabled:hover:bg-red-500/15 enabled:hover:text-white enabled:hover:shadow-[0_0_12px_rgba(239,68,68,0.35)]';
+const botonPaginaActivo =
+    'border-red-500 bg-red-600 font-bold text-white shadow-[0_0_16px_rgba(220,38,38,0.55)]';
+
 function LaptopsNotebooks() {
     const [productos, setProductos] = useState([]);
     const [marcas, setMarcas] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const { agregar } = useCarrito();
+
     // ---- Paginación, orden, búsqueda y filtro (server-side) ----
     const [pagina, setPagina] = useState(1);
     const [limite, setLimite] = useState(9);
@@ -24,7 +41,14 @@ function LaptopsNotebooks() {
     const [busqueda, setBusqueda] = useState('');
     const [filtroMarca, setFiltroMarca] = useState('');
 
-    // Carga de laptops (se re-ejecuta cada vez que cambia página, orden, búsqueda o marca)
+    // Animación de entrada: empieza oculto y pasa a visible apenas se monta la página
+    const [visible, setVisible] = useState(false);
+    useEffect(() => {
+        const id = requestAnimationFrame(() => setVisible(true));
+        return () => cancelAnimationFrame(id);
+    }, []);
+
+    // Carga (se re-ejecuta cada vez que cambia página, orden, búsqueda o marca)
     const cargarLaptops = useCallback(async () => {
         try {
             setLoading(true);
@@ -72,7 +96,7 @@ function LaptopsNotebooks() {
     }, [cargarLaptops]);
 
     const handleAgregarAlCarrito = (producto) => {
-       agregar(producto);
+        agregar(producto);
     };
 
     const handleBusquedaChange = (e) => { setBusqueda(e.target.value); setPagina(1); };
@@ -92,53 +116,54 @@ function LaptopsNotebooks() {
     const finRegistro = Math.min(pagina * limite, total);
 
     return (
-        <div className="space-y-8 animate-fade-in">
-            {/* Banner Descriptivo de la Categoría */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm space-y-6">
-                <div className="flex items-center gap-3">
-                    {/* Estética unificada con el rojo corporativo compuMarket */}
-                    <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-2xl text-red-600">
+        <div
+            className={`space-y-8 transition-all duration-700 ease-out ${
+                visible ? 'translate-y-0 scale-100 opacity-100 blur-0' : 'translate-y-6 scale-[0.98] opacity-0 blur-sm'
+            }`}
+        >
+            {/* Banner descriptivo de la categoría */}
+            <div className={`${filtrosBox} space-y-6 p-8`}>
+                <div className="flex items-center gap-3.5">
+                    <span className="flex h-12 w-12 items-center justify-center rounded-xl border border-red-500/50 bg-red-600/15 text-2xl text-red-400 shadow-[0_0_14px_rgba(220,38,38,0.35)]">
                         💻
                     </span>
                     <div>
-                        <h2 className="text-2xl font-black text-slate-900 tracking-tight">Laptops & Notebooks</h2>
-                        <p className="text-sm font-semibold text-slate-500">
+                        <h2 className="text-2xl font-black tracking-tight text-white">Laptops & Notebooks</h2>
+                        <p className="text-sm font-semibold text-red-400">
                             Equipos portátiles de alto rendimiento para gaming, diseño y productividad extrema
                         </p>
                     </div>
                 </div>
 
-                <p className="text-slate-600 leading-relaxed text-sm">
+                <p className="text-sm leading-relaxed text-slate-300">
                     Rendimiento sin límites vayas donde vayas. Nuestra plataforma sincroniza de forma directa el stock de laptops de última generación, equipadas con pantallas de alta tasa de refresco, procesadores avanzados y soluciones térmicas de vanguardia para máxima exigencia profesional.
                 </p>
 
                 {/* Sub-bloques informativos técnicos */}
                 <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-                        <h3 className="font-bold text-sm text-slate-900 flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 bg-red-600 rounded-full"></span>
+                    <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
+                        <h3 className="flex items-center gap-2 text-sm font-bold text-white">
+                            <span className="h-2 w-2 rounded-full bg-red-500 shadow-[0_0_8px_#ef4444]"></span>
                             Poder Gamer Portátil
                         </h3>
-                        <p className="mt-1 text-xs text-slate-500 leading-relaxed">
+                        <p className="mt-1.5 text-xs leading-relaxed text-slate-400">
                             Equipos equipados con placas gráficas dedicadas de última serie y pantallas fluidas ideales para eSports y trazado de rayos en tiempo real.
                         </p>
                     </div>
-                    <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-                        <h3 className="font-bold text-sm text-slate-900 flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 bg-red-600 rounded-full"></span>
+                    <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
+                        <h3 className="flex items-center gap-2 text-sm font-bold text-white">
+                            <span className="h-2 w-2 rounded-full bg-red-500 shadow-[0_0_8px_#ef4444]"></span>
                             Estaciones de Trabajo Móviles
                         </h3>
-                        <p className="mt-1 text-xs text-slate-500 leading-relaxed">
+                        <p className="mt-1.5 text-xs leading-relaxed text-slate-400">
                             Máxima autonomía y pantallas de alta fidelidad cromática calibradas de fábrica, optimizadas para desarrollo, arquitectura y edición de video.
                         </p>
                     </div>
                 </div>
             </div>
 
-            {/* ===================================================================
-                NUEVO: BARRA DE BÚSQUEDA, FILTRO POR MARCA, ORDEN Y LÍMITE
-                =================================================================== */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            {/* Barra de búsqueda, filtro por marca, orden y límite */}
+            <div className={`${filtrosBox} p-4`}>
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-12 md:items-center">
                     {/* Búsqueda */}
                     <div className="relative md:col-span-5">
@@ -152,12 +177,12 @@ function LaptopsNotebooks() {
                             value={busqueda}
                             onChange={handleBusquedaChange}
                             placeholder="Buscar por nombre, SKU o descripción..."
-                            className="w-full rounded-xl border border-slate-300 py-2 pl-9 pr-8 text-sm text-slate-900 placeholder-slate-400 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
+                            className={`${inputGamer} w-full rounded-xl py-2 pl-9 pr-8 text-sm`}
                         />
                         {busqueda && (
                             <button
                                 onClick={handleLimpiarBusqueda}
-                                className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600"
+                                className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-red-400"
                                 title="Limpiar búsqueda"
                             >
                                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -172,7 +197,7 @@ function LaptopsNotebooks() {
                         <select
                             value={filtroMarca}
                             onChange={handleFiltroMarcaChange}
-                            className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-700 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
+                            className={`${inputGamer} w-full rounded-xl px-3 py-2 text-sm`}
                         >
                             <option value="">Todas las marcas</option>
                             {marcas.map((m) => (
@@ -191,7 +216,7 @@ function LaptopsNotebooks() {
                                 setDireccion(dir);
                                 setPagina(1);
                             }}
-                            className="w-full rounded-xl border border-slate-300 px-2 py-2 text-sm text-slate-700 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
+                            className={`${inputGamer} w-full rounded-xl px-2 py-2 text-sm`}
                         >
                             <option value="nombre-ASC">Nombre A-Z</option>
                             <option value="nombre-DESC">Nombre Z-A</option>
@@ -202,11 +227,11 @@ function LaptopsNotebooks() {
 
                     {/* Registros por página */}
                     <div className="flex items-center gap-2 md:col-span-2">
-                        <label className="text-xs font-medium text-slate-500 whitespace-nowrap">Mostrar:</label>
+                        <label className="whitespace-nowrap text-xs font-semibold text-slate-400">Mostrar:</label>
                         <select
                             value={limite}
                             onChange={handleLimiteChange}
-                            className="w-full rounded-xl border border-slate-300 px-2 py-2 text-sm text-slate-700 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
+                            className={`${inputGamer} w-full rounded-xl px-2 py-2 text-sm`}
                         >
                             <option value="6">6</option>
                             <option value="9">9</option>
@@ -219,7 +244,7 @@ function LaptopsNotebooks() {
                     <div className="mt-3 text-right">
                         <button
                             onClick={handleLimpiarFiltros}
-                            className="inline-flex items-center gap-1 text-xs font-semibold text-red-600 hover:text-red-800"
+                            className="inline-flex items-center gap-1 text-xs font-bold text-red-400 transition hover:text-red-300"
                         >
                             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -230,20 +255,20 @@ function LaptopsNotebooks() {
                 )}
             </div>
 
-            {/* Grilla Dinámica con Productos Reales del Backend */}
+            {/* Grilla dinámica con productos reales del backend */}
             <div className="space-y-4">
-                <h3 className="text-lg font-black text-slate-900 tracking-tight">Modelos Disponibles</h3>
+                <h3 className="text-lg font-black tracking-tight text-slate-900">Modelos Disponibles</h3>
 
                 {loading ? (
-                    <div className="text-center py-10 font-semibold text-slate-400 text-sm animate-pulse">
+                    <div className="animate-pulse py-10 text-center text-sm font-semibold text-slate-400">
                         Sincronizando inventario de notebooks...
                     </div>
                 ) : error ? (
-                    <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700">
+                    <div className="rounded-xl border border-red-500/40 bg-red-950/30 p-4 text-sm font-medium text-red-400">
                         {error}
                     </div>
                 ) : productos.length === 0 ? (
-                    <div className="text-center py-12 bg-white rounded-xl border border-dashed border-slate-200">
+                    <div className={`${filtrosBox} py-12 text-center`}>
                         <p className="text-sm font-medium text-slate-400">
                             {busqueda || filtroMarca
                                 ? 'No se encontraron equipos con esos filtros.'
@@ -251,7 +276,7 @@ function LaptopsNotebooks() {
                         </p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
                         {productos.map((prod) => (
                             <ProductCard
                                 key={prod.id}
@@ -263,29 +288,34 @@ function LaptopsNotebooks() {
                 )}
             </div>
 
-            {/* ===================================================================
-                NUEVO: PAGINACIÓN EN SERVIDOR
-                =================================================================== */}
+            {/* Paginación en servidor */}
             {total > 0 && (
-                <div className="flex flex-col items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm sm:flex-row">
-                    <div className="text-xs text-slate-500">
-                        Mostrando <strong className="text-slate-800">{inicioRegistro}</strong> a <strong className="text-slate-800">{finRegistro}</strong> de <strong className="text-slate-800">{total}</strong> equipos
+                <div className={`${filtrosBox} flex flex-col items-center justify-between gap-4 px-4 py-3 sm:flex-row`}>
+                    <div className="text-xs text-slate-400">
+                        Mostrando <strong className="text-white">{inicioRegistro}</strong> a <strong className="text-white">{finRegistro}</strong> de <strong className="text-white">{total}</strong> equipos
                         {totalPaginas > 1 && (
-                            <span> (Página <strong>{pagina}</strong> de <strong>{totalPaginas}</strong>)</span>
+                            <span> (Página <strong className="text-white">{pagina}</strong> de <strong className="text-white">{totalPaginas}</strong>)</span>
                         )}
                     </div>
 
                     <div className="flex items-center gap-1">
-                        <button onClick={() => setPagina(1)} disabled={pagina === 1}
-                            className="rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40" title="Primera página">
+                        <button
+                            onClick={() => setPagina(1)}
+                            disabled={pagina === 1}
+                            className={`${botonPagina} ${botonPaginaNormal}`}
+                            title="Primera página"
+                        >
                             «
                         </button>
-                        <button onClick={() => setPagina((prev) => Math.max(prev - 1, 1))} disabled={pagina === 1}
-                            className="inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40">
+                        <button
+                            onClick={() => setPagina((prev) => Math.max(prev - 1, 1))}
+                            disabled={pagina === 1}
+                            className={`${botonPagina} ${botonPaginaNormal}`}
+                        >
                             Anterior
                         </button>
 
-                        <div className="hidden sm:flex items-center gap-1">
+                        <div className="hidden items-center gap-1 sm:flex">
                             {Array.from({ length: totalPaginas }, (_, i) => i + 1)
                                 .filter((p) => p === 1 || p === totalPaginas || Math.abs(p - pagina) <= 1)
                                 .map((p, idx, arr) => {
@@ -293,11 +323,13 @@ function LaptopsNotebooks() {
                                     const esPuntitos = prev && p - prev > 1;
                                     return (
                                         <div key={p} className="flex items-center gap-1">
-                                            {esPuntitos && <span className="px-1 text-slate-400">...</span>}
-                                            <button onClick={() => setPagina(p)}
-                                                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-                                                    pagina === p ? 'bg-red-600 text-white shadow-sm' : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-100'
-                                                }`}>
+                                            {esPuntitos && <span className="px-1 text-slate-500">...</span>}
+                                            <button
+                                                onClick={() => setPagina(p)}
+                                                className={`${botonPagina} ${
+                                                    pagina === p ? botonPaginaActivo : botonPaginaNormal
+                                                }`}
+                                            >
                                                 {p}
                                             </button>
                                         </div>
@@ -305,12 +337,19 @@ function LaptopsNotebooks() {
                                 })}
                         </div>
 
-                        <button onClick={() => setPagina((prev) => Math.min(prev + 1, totalPaginas))} disabled={pagina >= totalPaginas}
-                            className="inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40">
+                        <button
+                            onClick={() => setPagina((prev) => Math.min(prev + 1, totalPaginas))}
+                            disabled={pagina >= totalPaginas}
+                            className={`${botonPagina} ${botonPaginaNormal}`}
+                        >
                             Siguiente
                         </button>
-                        <button onClick={() => setPagina(totalPaginas)} disabled={pagina >= totalPaginas}
-                            className="rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40" title="Última página">
+                        <button
+                            onClick={() => setPagina(totalPaginas)}
+                            disabled={pagina >= totalPaginas}
+                            className={`${botonPagina} ${botonPaginaNormal}`}
+                            title="Última página"
+                        >
                             »
                         </button>
                     </div>

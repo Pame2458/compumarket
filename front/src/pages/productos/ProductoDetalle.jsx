@@ -9,31 +9,12 @@ import { useCarrito } from '../../context/Carritocontext';
 // El backend monta las rutas bajo /api. Ajustá el puerto al de tu backend.
 const API_URL = 'http://localhost:3000/api';
 
-// DATOS DE EJEMPLO: después se reemplazan por las reseñas reales del backend
-// (tabla Calificacion, solo de clientes que compraron el producto).
-const RESENAS_EJEMPLO = [
-    {
-        id: 1,
-        cliente: 'Martina G.',
-        puntaje: 5,
-        fecha: '2026-09-28',
-        comentario: 'Llegó rápido y funciona perfecto. Muy buena relación precio-calidad.',
-    },
-    {
-        id: 2,
-        cliente: 'Lucas R.',
-        puntaje: 4,
-        fecha: '2026-09-15',
-        comentario: 'Cumple con lo que promete. El embalaje podría ser mejor.',
-    },
-    {
-        id: 3,
-        cliente: 'Camila P.',
-        puntaje: 5,
-        fecha: '2026-08-30',
-        comentario: 'Lo recomiendo, lo uso todos los días sin problemas.',
-    },
-];
+// NUEVO: arma el nombre público de la reseña, ej. "Martina G." (nombre + inicial del apellido).
+const nombrePublico = (cliente) => {
+    if (!cliente) return 'Cliente';
+    const inicial = cliente.apellido ? ` ${cliente.apellido.charAt(0)}.` : '';
+    return `${cliente.nombre}${inicial}`;
+};
 
 // Muestra estrellas llenas y vacías según el puntaje (de 0 a 5).
 function Estrellas({ puntaje, className = 'text-lg' }) {
@@ -58,6 +39,11 @@ function ProductoDetalle() {
     const [agregado, setAgregado] = useState(false);
     const { agregar } = useCarrito();
 
+    // NUEVO: reseñas reales que vienen del backend
+    const [resenas, setResenas] = useState([]);
+    const [promedio, setPromedio] = useState(0);
+    const [totalResenas, setTotalResenas] = useState(0);
+
     useEffect(() => {
         const cargar = async () => {
             try {
@@ -78,6 +64,24 @@ function ProductoDetalle() {
             }
         };
         cargar();
+    }, [id]);
+
+    // NUEVO: trae las reseñas aprobadas, el promedio y el total del producto.
+    // Va en su propio efecto: si falla, el producto igual se ve.
+    useEffect(() => {
+        const cargarResenas = async () => {
+            try {
+                const res = await fetch(`${API_URL}/calificaciones/producto/${id}`);
+                const json = await res.json();
+                if (!res.ok || !json.estado) return;
+                setResenas(json.data || []);
+                setPromedio(json.promedio || 0);
+                setTotalResenas(json.total || 0);
+            } catch (err) {
+                console.error('No se pudieron cargar las reseñas:', err);
+            }
+        };
+        cargarResenas();
     }, [id]);
 
     if (cargando) {
@@ -112,11 +116,8 @@ function ProductoDetalle() {
         setTimeout(() => setAgregado(false), 2500);
     };
 
-    // Promedio de las reseñas de ejemplo (después vendrá del backend).
-    const resenas = RESENAS_EJEMPLO;
-    const promedio = resenas.length
-        ? resenas.reduce((acc, r) => acc + r.puntaje, 0) / resenas.length
-        : 0;
+    // CAMBIO: el promedio y el total ya vienen calculados del backend (cuentan todas las estrellas).
+    const textoResenas = `${totalResenas} ${totalResenas === 1 ? 'reseña' : 'reseñas'}`;
 
     return (
         <div className="catalogo-contenedor mx-auto max-w-6xl px-4 py-10">
@@ -150,7 +151,7 @@ function ProductoDetalle() {
                         <Estrellas puntaje={promedio} />
                         <span className="font-bold text-white">{promedio.toFixed(1)}</span>
                         <a href="#resenas" className="text-slate-400 hover:text-red-400 hover:underline transition">
-                            ({resenas.length} reseñas)
+                            ({textoResenas})
                         </a>
                     </div>
 
@@ -235,13 +236,13 @@ function ProductoDetalle() {
                     <span className="text-4xl font-black text-slate-900">{promedio.toFixed(1)}</span>
                     <div>
                         <Estrellas puntaje={promedio} className="text-xl" />
-                        <p className="text-sm text-slate-500">Basado en {resenas.length} reseñas</p>
+                        <p className="text-sm text-slate-500">Basado en {textoResenas}</p>
                     </div>
                 </div>
 
                 {resenas.length === 0 ? (
                     <p className="mt-6 text-sm text-slate-500">
-                        Todavía no hay reseñas para este producto.
+                        Todavía no hay opiniones publicadas para este producto.
                     </p>
                 ) : (
                     <ul className="mt-6 space-y-4">
@@ -249,7 +250,8 @@ function ProductoDetalle() {
                             <li key={r.id} className="detalle-resena-card rounded-xl p-5">
                                 <div className="flex flex-wrap items-center justify-between gap-2">
                                     <div className="flex items-center gap-2">
-                                        <span className="font-bold text-white">{r.cliente}</span>
+                                        {/* CAMBIO: el nombre sale del cliente que dejó la reseña */}
+                                        <span className="font-bold text-white">{nombrePublico(r.Cliente)}</span>
                                         <span className="rounded-full border border-emerald-500/40 bg-emerald-950/50 px-2.5 py-0.5 text-xs font-semibold text-emerald-400">
                                             Compra verificada
                                         </span>
@@ -259,7 +261,10 @@ function ProductoDetalle() {
                                     </span>
                                 </div>
                                 <Estrellas puntaje={r.puntaje} className="mt-1.5 text-base" />
-                                <p className="mt-2 text-sm leading-relaxed text-slate-300">{r.comentario}</p>
+                                {/* CAMBIO: si dejó solo estrellas no hay comentario para mostrar */}
+                                {r.comentario && (
+                                    <p className="mt-2 text-sm leading-relaxed text-slate-300">{r.comentario}</p>
+                                )}
                             </li>
                         ))}
                     </ul>

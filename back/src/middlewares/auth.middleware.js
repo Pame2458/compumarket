@@ -148,3 +148,56 @@ export const verificarAdmin = (req, res, next) => {
         }
     });
 };
+/**
+ * verificarOperadorOAdmin
+ * Igual que verificarAdmin, pero acepta también el rol "operador".
+ * Se usa en las rutas de solo consulta.
+ */
+export const verificarOperadorOAdmin = (req, res, next) => {
+    verificarToken(JWT_SECRET_ADMIN)(req, res, async (err) => {
+        if (err) return next(err);
+
+        try {
+            if (!req.user || req.user.tipo !== 'admin') {
+                return res.status(403).json({
+                    estado: false,
+                    mensaje: 'Acceso solo para el equipo de gestión',
+                });
+            }
+
+            const usuario = await Usuario.findByPk(req.user.id, {
+                include: { model: Rol, as: 'rol' },
+            });
+
+            if (!usuario || !usuario.rol) {
+                return res.status(403).json({
+                    estado: false,
+                    mensaje: 'Usuario o rol no encontrado',
+                });
+            }
+
+            const rolesPermitidos = ['administrador', 'operador'];
+
+            if (!rolesPermitidos.includes(usuario.rol.nombre.toLowerCase())) {
+                return res.status(403).json({
+                    estado: false,
+                    mensaje: 'No tenés permisos para esta acción',
+                });
+            }
+
+            req.usuario = usuario;
+            next();
+        } catch (error) {
+            console.error('Error en verificarOperadorOAdmin:', error);
+            return res.status(500).json({
+                estado: false,
+                mensaje: 'Error al verificar usuario',
+                error: error.message,
+            });
+        }
+    });
+};
+
+// Acceso al panel: administrador u operador.
+// Es la función que importan auth.routes.js y adminPedidos.routes.js.
+export const verificarPanel = verificarOperadorOAdmin;

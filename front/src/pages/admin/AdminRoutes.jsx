@@ -17,10 +17,12 @@ import AdminLayout from './AdminLayout.jsx';
 import LoginAdmin from './LoginAdmin.jsx';
 import AdminDashboard from './AdminDashboard.jsx';
 import AdminUsuarios from './AdminUsuarios.jsx';
+import AdminClientes from './AdminCliente.jsx'; // NUEVA
 import AdminCategorias from './adminCategorias.jsx';
 import AdminProductos from './AdminProductos.jsx';
 import AdminMarcas from './adminMarcas.jsx';
 import AdminPedidos from './AdminPedidos.jsx';
+import AdminResenas from './AdminResenas.jsx';
 
 
 function AdminRoutes() {
@@ -45,10 +47,13 @@ function AdminRoutes() {
                 <Route index element={<AdminDashboard />} />
                 {/* /admin/usuarios: CRUD de administradores */}
                 <Route path="usuarios" element={<AdminUsuarios />} />
+                {/* /admin/clientes: consulta de clientes y su historial de pedidos */}
+                <Route path="clientes" element={<AdminClientes />} /> {/* NUEVA */}
                 <Route path="categorias" element={<AdminCategorias />} />
                 <Route path="productos" element={<AdminProductos />} />
                 <Route path="marcas" element={<AdminMarcas />} />
                 <Route path="pedidos" element={<AdminPedidos />} />
+                <Route path="resenas" element={<AdminResenas />} />
             </Route>
         </Routes>
     );

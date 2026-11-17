@@ -13,6 +13,9 @@ import pedidosRoutes from './pedidos.routes.js';
 import enviosRoutes from './envios.routes.js';
 import pagosRoutes from './pagos.routes.js';
 import adminPedidosRoutes from './adminPedidos.routes.js';
+import adminCalificacionesRoutes from './adminCalificaciones.routes.js';
+import clientesAdminRoutes from './Clientes.admin.routes.js';
+import adminEstadisticasRoutes from './adminEstadisticas.routes.js'; // NUEVA
 const router = Router();
 
 // Módulo de accesos
@@ -32,8 +35,10 @@ router.use('/calificaciones', calificacionesRoutes);
 router.use('/carritos', carritosRoutes);
 router.use('/pedidos', pedidosRoutes);
 router.use('/admin/pedidos', adminPedidosRoutes);
+router.use('/admin/calificaciones', adminCalificacionesRoutes);
+router.use('/admin/clientes', clientesAdminRoutes);
+router.use('/admin/estadisticas', adminEstadisticasRoutes); // NUEVA
 router.use('/envios', enviosRoutes);
 router.use('/pagos', pagosRoutes);
 
 export default router;
-
