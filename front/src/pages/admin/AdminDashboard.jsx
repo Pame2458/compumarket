@@ -17,7 +17,7 @@ function AdminDashboard() {
                     ¡Hola, {admin?.nombre}!
                 </h2>
                 <p className="mt-1 text-slate-600">
-                    Este es el panel de administración de INTEGRADO. Desde acá podés gestionar el sistema.
+                    Este es el panel de administración de compuMarket. Desde acá podés gestionar el sistema.
                 </p>
                 <div className="mt-3 inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 text-sm font-semibold text-indigo-700 uppercase">
                    Rol: {admin?.rol?.nombre}

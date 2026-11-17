@@ -34,21 +34,26 @@ const Cliente = sequelize.define('Cliente', {
     resetPasswordExpires: {
         type: DataTypes.DATE,
     },
+    emailVerificado: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+    },
 }, {
     tableName: 'clientes',
     timestamps: false,
-  hooks: {
-    beforeCreate: async (cliente) => {
-        if (cliente.password) {
-            cliente.password = await encriptarPassword(cliente.password);
-        }
+    hooks: {
+        beforeCreate: async (cliente) => {
+            if (cliente.password) {
+                cliente.password = await encriptarPassword(cliente.password);
+            }
+        },
+        beforeUpdate: async (cliente) => {
+            if (cliente.changed('password')) {
+                cliente.password = await encriptarPassword(cliente.password);
+            }
+        },
     },
-    beforeUpdate: async (cliente) => {
-        if (cliente.changed('password')) {
-            cliente.password = await encriptarPassword(cliente.password);
-        }
-    },
-},
 });
 
 export default Cliente;

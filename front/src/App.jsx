@@ -23,12 +23,13 @@ import LaptopsNotebooks from './pages/productos/LaptopsNotebooks.jsx';
 import Contacto from './pages/Contacto.jsx';
 import Login from './pages/Login.jsx';
 import Registro from './pages/Registro.jsx';
-
+import VerificarEmail from './pages/VerificarEmail.jsx';
 // 🌟 IMPORTACIONES DE RECUPERACIÓN DE CONTRASEÑA
 import RecuperarPassword from './pages/RecuperarPassword.jsx';
 import RestablecerPassword from './pages/RestablecerPassword.jsx';
 
 import Perfil from './pages/Perfil.jsx';
+import MisPedidos from './pages/MisPedidos.jsx';
 import AdminRoutes from './pages/admin/AdminRoutes.jsx';
 import './App.css';
 import Checkout from './pages/productos/Checkout.jsx';
@@ -81,6 +82,7 @@ function App() {
                 <Route path="/contacto" element={<Contacto />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/registro" element={<Registro />} />
+                <Route path="/verificar-email" element={<VerificarEmail />} />
                 <Route path="/producto/:id" element={<ProductoDetalle />} />
 
                 {/* 🌟 RUTAS PÚBLICAS DE GESTIÓN DE CREDENCIALES */}
@@ -88,11 +90,19 @@ function App() {
                 <Route path="/restablecer-password" element={<RestablecerPassword />} />
 
                 {/* Ruta Protegida: Información de la tabla Cliente del DER */}
-                <Route
+                                <Route
                   path="/perfil"
                   element={
                     <RutaProtegida>
                       <Perfil />
+                    </RutaProtegida>
+                  }
+                />
+                <Route
+                  path="/mis-pedidos"
+                  element={
+                    <RutaProtegida>
+                      <MisPedidos />
                     </RutaProtegida>
                   }
                 />

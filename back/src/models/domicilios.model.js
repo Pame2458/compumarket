@@ -1,46 +1,46 @@
-// src/models/Domicilio.js
-import { DataTypes } from "sequelize";
-import { sequelize } from "../config/database.js";
-import Usuario from "./clientes.model.js";
+// models/domicilios.model.js
+import { DataTypes } from 'sequelize';
+import sequelize from '../config/database.js';
 
-const Domicilio = sequelize.define("Domicilio", {
-  id: {
-    type: DataTypes.INTEGER,
-    autoIncrement: true,
-    primaryKey: true,
-  },
-  calle: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  numero: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  ciudad: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-   departamento: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-   piso: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  codigoPostal: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  idCliente: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  }
+const Domicilio = sequelize.define('Domicilio', {
+    id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+    },
+    calle: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    numero: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    ciudad: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    departamento: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: '',
+    },
+    piso: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: '',
+    },
+    codigoPostal: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    idCliente: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+    },
 }, {
-  timestamps: true // createdAt y updatedAt
+    tableName: 'domicilios',
+    timestamps: true, // createdAt y updatedAt (la tabla ya las tiene)
 });
-
-
 
 export default Domicilio;

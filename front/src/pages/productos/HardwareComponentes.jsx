@@ -6,6 +6,8 @@ import { useState, useEffect, useCallback } from 'react';
 import api from '../../services/api'; // Asegúrate de que la ruta sea correcta según tu estructura de carpetas
 import ProductCard from '../../components/ProductCard';
 import { useCarrito } from '../../context/Carritocontext';
+
+
 function HardwareComponentes() {
     const [productos, setProductos] = useState([]);
     const [marcas, setMarcas] = useState([]);
@@ -92,56 +94,49 @@ function HardwareComponentes() {
     const finRegistro = Math.min(pagina * limite, total);
 
     return (
-        <div className="space-y-8 animate-fade-in">
-            {/* Banner Descriptivo de la Categoría */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm space-y-6">
-                <div className="flex items-center gap-3">
-                    {/* Estética unificada con el rojo corporativo compuMarket */}
-                    <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-2xl text-red-600">
+          //de aca al final hice el cambio
+        <div className="catalogo-contenedor space-y-8">
+            <div className="categoria-banner-gamer rounded-2xl p-8 space-y-6">
+                <div className="flex items-center gap-3.5">
+                    <span className="categoria-icon-gamer flex h-12 w-12 items-center justify-center rounded-xl text-2xl">
                         ⚡
                     </span>
                     <div>
-                        <h2 className="text-2xl font-black text-slate-900 tracking-tight">Hardware & Componentes</h2>
-                        <p className="text-sm font-semibold text-slate-500">
+                        <h2 className="text-2xl font-black text-white tracking-tight">Hardware & Componentes</h2>
+                        <p className="text-sm font-semibold text-red-400">
                             Potencia bruta, estabilidad y rendimiento de última generación para tu setup
                         </p>
                     </div>
                 </div>
 
-                <p className="text-slate-600 leading-relaxed text-sm">
+                <p className="text-slate-300 leading-relaxed text-sm">
                     Llevá tu computadora al límite con componentes internos seleccionados para máxima exigencia.
                     Nuestra plataforma se sincroniza de forma directa con el inventario para listar placas de video avanzadas, procesadores multihilo y memorias de alta frecuencia con integridad garantizada.
                 </p>
 
-                {/* Sub-bloques informativos técnicos */}
                 <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-                        <h3 className="font-bold text-sm text-slate-900 flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 bg-red-600 rounded-full"></span>
+                    <div className="categoria-subcard-gamer rounded-xl p-4">
+                        <h3 className="font-bold text-sm text-white flex items-center gap-2">
+                            <span className="w-2 h-2 bg-red-500 rounded-full shadow-[0_0_8px_#ef4444]"></span>
                             Procesamiento Gráfico Extremo
                         </h3>
-                        <p className="mt-1 text-xs text-slate-500 leading-relaxed">
+                        <p className="mt-1.5 text-xs text-slate-400 leading-relaxed">
                             Placas de video optimizadas para trazado de rayos (Ray Tracing), renderizado 3D y streaming en alta resolución sin caídas de cuadros.
                         </p>
                     </div>
-                    <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-                        <h3 className="font-bold text-sm text-slate-900 flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 bg-red-600 rounded-full"></span>
+                    <div className="categoria-subcard-gamer rounded-xl p-4">
+                        <h3 className="font-bold text-sm text-white flex items-center gap-2">
+                            <span className="w-2 h-2 bg-red-500 rounded-full shadow-[0_0_8px_#ef4444]"></span>
                             Arquitecturas de Alta Eficiencia
                         </h3>
-                        <p className="mt-1 text-xs text-slate-500 leading-relaxed">
+                        <p className="mt-1.5 text-xs text-slate-400 leading-relaxed">
                             Procesadores y placas madre con soporte para PCIe 5.0 y memorias DDR5, asegurando ancho de banda y velocidad crítica.
                         </p>
                     </div>
                 </div>
             </div>
-
-            {/* ===================================================================
-                NUEVO: BARRA DE BÚSQUEDA, FILTRO POR MARCA, ORDEN Y LÍMITE
-                =================================================================== */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                        <div className="catalogo-filtros-box rounded-2xl p-4">
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-12 md:items-center">
-                    {/* Búsqueda */}
                     <div className="relative md:col-span-5">
                         <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
                             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -153,12 +148,12 @@ function HardwareComponentes() {
                             value={busqueda}
                             onChange={handleBusquedaChange}
                             placeholder="Buscar por nombre, SKU o descripción..."
-                            className="w-full rounded-xl border border-slate-300 py-2 pl-9 pr-8 text-sm text-slate-900 placeholder-slate-400 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
+                            className="catalogo-input w-full rounded-xl py-2 pl-9 pr-8 text-sm"
                         />
                         {busqueda && (
                             <button
                                 onClick={handleLimpiarBusqueda}
-                                className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600"
+                                className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-red-400"
                                 title="Limpiar búsqueda"
                             >
                                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -168,12 +163,11 @@ function HardwareComponentes() {
                         )}
                     </div>
 
-                    {/* Filtro por Marca */}
                     <div className="md:col-span-3">
                         <select
                             value={filtroMarca}
                             onChange={handleFiltroMarcaChange}
-                            className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-700 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
+                            className="catalogo-input w-full rounded-xl px-3 py-2 text-sm"
                         >
                             <option value="">Todas las marcas</option>
                             {marcas.map((m) => (
@@ -182,7 +176,6 @@ function HardwareComponentes() {
                         </select>
                     </div>
 
-                    {/* Orden */}
                     <div className="md:col-span-2">
                         <select
                             value={`${ordenarPor}-${direccion}`}
@@ -192,7 +185,7 @@ function HardwareComponentes() {
                                 setDireccion(dir);
                                 setPagina(1);
                             }}
-                            className="w-full rounded-xl border border-slate-300 px-2 py-2 text-sm text-slate-700 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
+                            className="catalogo-input w-full rounded-xl px-2 py-2 text-sm"
                         >
                             <option value="nombre-ASC">Nombre A-Z</option>
                             <option value="nombre-DESC">Nombre Z-A</option>
@@ -201,13 +194,12 @@ function HardwareComponentes() {
                         </select>
                     </div>
 
-                    {/* Registros por página */}
                     <div className="flex items-center gap-2 md:col-span-2">
-                        <label className="text-xs font-medium text-slate-500 whitespace-nowrap">Mostrar:</label>
+                        <label className="text-xs font-semibold text-slate-400 whitespace-nowrap">Mostrar:</label>
                         <select
                             value={limite}
                             onChange={handleLimiteChange}
-                            className="w-full rounded-xl border border-slate-300 px-2 py-2 text-sm text-slate-700 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
+                            className="catalogo-input w-full rounded-xl px-2 py-2 text-sm"
                         >
                             <option value="6">6</option>
                             <option value="9">9</option>
@@ -220,7 +212,7 @@ function HardwareComponentes() {
                     <div className="mt-3 text-right">
                         <button
                             onClick={handleLimpiarFiltros}
-                            className="inline-flex items-center gap-1 text-xs font-semibold text-red-600 hover:text-red-800"
+                            className="inline-flex items-center gap-1 text-xs font-bold text-red-400 hover:text-red-300 transition"
                         >
                             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -231,20 +223,18 @@ function HardwareComponentes() {
                 )}
             </div>
 
-            {/* Grilla Dinámica con Productos Reales de la Base de Datos */}
             <div className="space-y-4">
                 <h3 className="text-lg font-black text-slate-900 tracking-tight">Componentes en Stock</h3>
-
                 {loading ? (
                     <div className="text-center py-10 font-semibold text-slate-400 text-sm animate-pulse">
                         Consultando inventario de hardware...
                     </div>
                 ) : error ? (
-                    <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700">
+                    <div className="rounded-xl border border-red-500/40 bg-red-950/30 p-4 text-sm font-medium text-red-400">
                         {error}
                     </div>
                 ) : productos.length === 0 ? (
-                    <div className="text-center py-12 bg-white rounded-xl border border-dashed border-slate-200">
+                    <div className="catalogo-filtros-box text-center py-12 rounded-xl">
                         <p className="text-sm font-medium text-slate-400">
                             {busqueda || filtroMarca
                                 ? 'No se encontraron componentes con esos filtros.'
@@ -263,26 +253,28 @@ function HardwareComponentes() {
                     </div>
                 )}
             </div>
-
-            {/* ===================================================================
-                NUEVO: PAGINACIÓN EN SERVIDOR
-                =================================================================== */}
             {total > 0 && (
-                <div className="flex flex-col items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm sm:flex-row">
-                    <div className="text-xs text-slate-500">
-                        Mostrando <strong className="text-slate-800">{inicioRegistro}</strong> a <strong className="text-slate-800">{finRegistro}</strong> de <strong className="text-slate-800">{total}</strong> componentes
+                <div className="catalogo-filtros-box flex flex-col items-center justify-between gap-4 rounded-2xl px-4 py-3 sm:flex-row">
+                    <div className="text-xs text-slate-400">
+                        Mostrando <strong className="text-white">{inicioRegistro}</strong> a <strong className="text-white">{finRegistro}</strong> de <strong className="text-white">{total}</strong> componentes
                         {totalPaginas > 1 && (
-                            <span> (Página <strong>{pagina}</strong> de <strong>{totalPaginas}</strong>)</span>
+                            <span> (Página <strong className="text-white">{pagina}</strong> de <strong className="text-white">{totalPaginas}</strong>)</span>
                         )}
                     </div>
-
                     <div className="flex items-center gap-1">
-                        <button onClick={() => setPagina(1)} disabled={pagina === 1}
-                            className="rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40" title="Primera página">
+                        <button
+                            onClick={() => setPagina(1)}
+                            disabled={pagina === 1}
+                            className="catalogo-page-btn rounded-lg px-2.5 py-1.5 text-xs font-bold disabled:cursor-not-allowed disabled:opacity-40"
+                            title="Primera página"
+                        >
                             «
                         </button>
-                        <button onClick={() => setPagina((prev) => Math.max(prev - 1, 1))} disabled={pagina === 1}
-                            className="inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40">
+                        <button
+                            onClick={() => setPagina((prev) => Math.max(prev - 1, 1))}
+                            disabled={pagina === 1}
+                            className="catalogo-page-btn inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-bold disabled:cursor-not-allowed disabled:opacity-40"
+                        >
                             Anterior
                         </button>
 
@@ -294,11 +286,13 @@ function HardwareComponentes() {
                                     const esPuntitos = prev && p - prev > 1;
                                     return (
                                         <div key={p} className="flex items-center gap-1">
-                                            {esPuntitos && <span className="px-1 text-slate-400">...</span>}
-                                            <button onClick={() => setPagina(p)}
-                                                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-                                                    pagina === p ? 'bg-red-600 text-white shadow-sm' : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-100'
-                                                }`}>
+                                            {esPuntitos && <span className="px-1 text-slate-500">...</span>}
+                                            <button
+                                                onClick={() => setPagina(p)}
+                                                className={`catalogo-page-btn rounded-lg px-3 py-1.5 text-xs font-bold ${
+                                                    pagina === p ? 'activo' : ''
+                                                }`}
+                                            >
                                                 {p}
                                             </button>
                                         </div>
@@ -306,12 +300,19 @@ function HardwareComponentes() {
                                 })}
                         </div>
 
-                        <button onClick={() => setPagina((prev) => Math.min(prev + 1, totalPaginas))} disabled={pagina >= totalPaginas}
-                            className="inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40">
+                        <button
+                            onClick={() => setPagina((prev) => Math.min(prev + 1, totalPaginas))}
+                            disabled={pagina >= totalPaginas}
+                            className="catalogo-page-btn inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-bold disabled:cursor-not-allowed disabled:opacity-40"
+                        >
                             Siguiente
                         </button>
-                        <button onClick={() => setPagina(totalPaginas)} disabled={pagina >= totalPaginas}
-                            className="rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40" title="Última página">
+                        <button
+                            onClick={() => setPagina(totalPaginas)}
+                            disabled={pagina >= totalPaginas}
+                            className="catalogo-page-btn rounded-lg px-2.5 py-1.5 text-xs font-bold disabled:cursor-not-allowed disabled:opacity-40"
+                            title="Última página"
+                        >
                             »
                         </button>
                     </div>

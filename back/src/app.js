@@ -57,9 +57,11 @@ const iniciarServidor = async () => {
         // Sincronización segura para el día a día: solo crea tablas que
         // no existen, nunca borra ni altera las que ya están.
         // (Si en algún momento necesitás reflejar un cambio de modelo en
-        // la DB, corré una vez sequelize.sync({ alter: true }) a mano y
+        // la DB, corré una vez 
+       //await sequelize.sync({ alter: true }) 
+        // a mano y
         // después volvé a dejar esta línea así.)
-        await sequelize.sync();
+       await sequelize.sync();
 
         console.log('Conexión a la base de datos establecida y tablas sincronizadas correctamente.');
 

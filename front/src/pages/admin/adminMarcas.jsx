@@ -1,4 +1,4 @@
-// AdminMarcas.jsx - CRUD de marcas del catálogo.
+// AdminMarcas.jsx - CRUD de marcas del catálogo (con ordenamiento y paginación).
 
 import { useEffect, useState } from 'react';
 import { Pencil, Trash2 } from "lucide-react";
@@ -9,6 +9,9 @@ import {
     eliminarMarca,
 } from '../../services/adminService.js';
 
+// Cantidad de marcas que se muestran por página
+const MARCAS_POR_PAGINA = 10;
+
 function AdminMarcas() {
     const [marcas, setMarcas] = useState([]);
     const [cargando, setCargando] = useState(true);
@@ -17,12 +20,79 @@ function AdminMarcas() {
     const [marcaAEliminar, setMarcaAEliminar] = useState(null);
 
     const [busqueda, setBusqueda] = useState('');
+    const [pagina, setPagina] = useState(1);
+    const [ordenarPor, setOrdenarPor] = useState('nombre');
+    const [direccion, setDireccion] = useState('ASC');
+
+    // 1) Filtro por búsqueda
     const marcasFiltradas = marcas.filter((m) =>
         (m.nombre || '').toLowerCase().includes(busqueda.trim().toLowerCase())
     );
-    const handleBusquedaChange = (e) => setBusqueda(e.target.value);
-    const handleLimpiarBusqueda = () => setBusqueda('');
-    const handleLimpiarFiltros = () => setBusqueda('');
+
+    // 2) Ordenamiento
+    const marcasOrdenadas = [...marcasFiltradas].sort((a, b) => {
+        const va = String(a[ordenarPor] ?? '');
+        const vb = String(b[ordenarPor] ?? '');
+        const comparacion = va.localeCompare(vb, 'es', { sensitivity: 'base' });
+        return direccion === 'ASC' ? comparacion : -comparacion;
+    });
+
+    // 3) Paginación: si la página actual quedó fuera de rango (por ejemplo, al borrar), se corrige sola
+    const totalPaginas = Math.max(1, Math.ceil(marcasOrdenadas.length / MARCAS_POR_PAGINA));
+    const paginaActual = Math.min(pagina, totalPaginas);
+    const inicio = (paginaActual - 1) * MARCAS_POR_PAGINA;
+    const marcasPagina = marcasOrdenadas.slice(inicio, inicio + MARCAS_POR_PAGINA);
+    const desde = marcasOrdenadas.length === 0 ? 0 : inicio + 1;
+    const hasta = inicio + marcasPagina.length;
+
+    const handleBusquedaChange = (e) => {
+        setBusqueda(e.target.value);
+        setPagina(1);
+    };
+    const handleLimpiarBusqueda = () => {
+        setBusqueda('');
+        setPagina(1);
+    };
+    const handleLimpiarFiltros = () => {
+        setBusqueda('');
+        setPagina(1);
+    };
+
+    // =========================================================================
+    // MANEJADORES DE ORDENAMIENTO (SORTING)
+    // =========================================================================
+    const handleSort = (columna) => {
+        if (ordenarPor === columna) {
+            setDireccion((prev) => (prev === 'ASC' ? 'DESC' : 'ASC'));
+        } else {
+            setOrdenarPor(columna);
+            setDireccion('ASC');
+        }
+        setPagina(1);
+    };
+
+    const renderSortArrow = (columna) => {
+        const isActive = ordenarPor === columna;
+        return (
+            <span className="inline-flex items-center ml-1.5 transition-colors">
+                {isActive ? (
+                    direccion === 'ASC' ? (
+                        <svg className="w-4 h-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 15l7-7 7 7" />
+                        </svg>
+                    ) : (
+                        <svg className="w-4 h-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                        </svg>
+                    )
+                ) : (
+                    <svg className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                    </svg>
+                )}
+            </span>
+        );
+    };
 
     const [modoFormulario, setModoFormulario] = useState(false);
     const [editandoId, setEditandoId] = useState(null);
@@ -241,19 +311,27 @@ function AdminMarcas() {
                 <table className="w-full text-sm">
                     <thead className="bg-slate-50">
                         <tr>
-                            <th className="px-4 py-3 text-left font-semibold text-slate-700">Nombre</th>
+                            <th
+                                onClick={() => handleSort('nombre')}
+                                className="group cursor-pointer select-none px-4 py-3 text-left font-semibold text-slate-700 transition hover:bg-slate-100"
+                            >
+                                <span className="inline-flex items-center">
+                                    Nombre
+                                    {renderSortArrow('nombre')}
+                                </span>
+                            </th>
                             <th className="px-4 py-3 text-center font-semibold text-slate-700">Acciones</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                        {marcasFiltradas.length === 0 ? (
+                        {marcasPagina.length === 0 ? (
                             <tr>
                                 <td colSpan={2} className="px-4 py-8 text-center text-slate-500">
                                     No hay marcas registradas.
                                 </td>
                             </tr>
                         ) : (
-                            marcasFiltradas.map((m) => (
+                            marcasPagina.map((m) => (
                                 <tr key={m.id} className="transition-colors hover:bg-slate-50/80">
                                     <td className="px-4 py-3 font-medium text-slate-900">{m.nombre}</td>
                                     <td className="px-4 py-3 text-center whitespace-nowrap">
@@ -279,6 +357,50 @@ function AdminMarcas() {
                         )}
                     </tbody>
                 </table>
+
+                {/* Paginación */}
+                {marcasOrdenadas.length > 0 && (
+                    <div className="flex flex-col items-center justify-between gap-3 border-t border-slate-200 bg-slate-50 px-4 py-3 sm:flex-row">
+                        <p className="text-xs font-medium text-slate-500">
+                            Mostrando {desde}–{hasta} de {marcasOrdenadas.length}
+                        </p>
+
+                        <div className="flex items-center gap-1">
+                            <button
+                                type="button"
+                                onClick={() => setPagina(paginaActual - 1)}
+                                disabled={paginaActual === 1}
+                                className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
+                            >
+                                Anterior
+                            </button>
+
+                            {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((n) => (
+                                <button
+                                    key={n}
+                                    type="button"
+                                    onClick={() => setPagina(n)}
+                                    className={`min-w-8 rounded-lg px-2 py-1.5 text-xs font-bold transition ${
+                                        n === paginaActual
+                                            ? 'bg-indigo-600 text-white'
+                                            : 'text-slate-600 hover:bg-white'
+                                    }`}
+                                >
+                                    {n}
+                                </button>
+                            ))}
+
+                            <button
+                                type="button"
+                                onClick={() => setPagina(paginaActual + 1)}
+                                disabled={paginaActual === totalPaginas}
+                                className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
+                            >
+                                Siguiente
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {marcaAEliminar && (

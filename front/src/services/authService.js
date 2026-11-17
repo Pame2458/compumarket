@@ -43,3 +43,8 @@ export const restablecerPasswordCliente = async (token, nuevaContraseña) => {
     const respuesta = await api.post('/auth/cliente/reset-password', { token, password:nuevaContraseña });
     return respuesta;
 };
+// 🔒 PUT /auth/cliente/password -> Cambia la contraseña del cliente logueado
+export const cambiarPasswordCliente = async (passwordActual, passwordNueva) => {
+    const respuesta = await api.put('/auth/cliente/password', { passwordActual, passwordNueva });
+    return respuesta;
+};

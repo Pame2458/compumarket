@@ -25,7 +25,7 @@ export const confirmarPedido = async (req, res) => {
         return res.status(400).json({ message: 'El carrito está vacío.' });
     }
 
-    // Transacción: o se guarda todo el pedido o no se guarda nada.
+    // Transacción: o se guarda todo el pedido (incluido el descuento de stock) o no se guarda nada.
     const t = await sequelize.transaction();
 
     try {
@@ -41,7 +41,12 @@ export const confirmarPedido = async (req, res) => {
                 return res.status(400).json({ message: 'Cantidad inválida en el carrito.' });
             }
 
-            const producto = await Producto.findByPk(item.id, { transaction: t });
+            // CAMBIO 1: se bloquea la fila del producto hasta terminar la transacción,
+            // así dos compras simultáneas no pueden vender el mismo stock.
+            const producto = await Producto.findByPk(item.id, {
+                transaction: t,
+                lock: t.LOCK.UPDATE,
+            });
 
             if (!producto || producto.estado !== 'activo') {
                 await t.rollback();
@@ -54,6 +59,10 @@ export const confirmarPedido = async (req, res) => {
                     message: `No hay stock suficiente de ${producto.nombre}.`,
                 });
             }
+
+            // CAMBIO 2: descuenta el stock dentro de la misma transacción.
+            // Si algo falla más adelante, el rollback también deshace este descuento.
+            await producto.decrement('stock', { by: cantidad, transaction: t });
 
             const subtotal = Number(producto.precio) * cantidad;
             montoTotal += subtotal;
@@ -152,7 +161,9 @@ export const confirmarPedido = async (req, res) => {
             total: montoTotal,
         });
     } catch (error) {
-        await t.rollback();
+        // CAMBIO 3: solo hace rollback si la transacción sigue abierta
+        // (si el error ocurrió después del commit, rollback tiraría otro error).
+        if (!t.finished) await t.rollback();
         console.error('Error en el flujo de checkout:', error);
         return res.status(500).json({ message: 'Error interno al procesar el pedido.' });
     }

@@ -276,3 +276,46 @@ button.primary {
   color: var(--accent);
   font-weight: 600;
 }
+
+
+/* Entrada suave de abajo hacia arriba */
+@keyframes fadeSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Vibración horizontal para alertas de error */
+@keyframes shakeError {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+/* Pulso sutil de luz tecnológica en el logo */
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 18px 4px rgba(220, 38, 38, 0.15);
+  }
+}
+
+/* Clases utilitarias para aplicar en React */
+.animate-card-enter {
+  animation: fadeSlideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-shake {
+  animation: shakeError 0.4s ease-in-out;
+}
+
+.animate-logo-glow {
+  animation: pulseGlow 3s infinite ease-in-out;
+}

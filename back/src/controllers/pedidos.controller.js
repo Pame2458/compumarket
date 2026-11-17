@@ -51,3 +51,48 @@ export const procesarCheckout = async (req, res) => {
         res.status(400).json({ estado: false, mensaje: 'Error al procesar el checkout transaccional', error: error.message });
     }
 };
+// 📦 MIS PEDIDOS (solo los del cliente logueado)
+export const obtenerMisPedidos = async (req, res) => {
+    try {
+        if (!req.cliente) {
+            return res.status(401).json({ estado: false, mensaje: 'No autorizado' });
+        }
+
+        const pedidos = await Pedido.findAll({
+            where: { idCliente: req.cliente.id },
+            order: [['fecha', 'DESC']],
+        });
+
+        const idsPedidos = pedidos.map((p) => p.id);
+        const detalles = idsPedidos.length
+            ? await DetallePedido.findAll({ where: { idPedido: idsPedidos } })
+            : [];
+
+        const idsProductos = [...new Set(detalles.map((d) => d.idProducto))];
+        const productos = idsProductos.length
+            ? await Producto.findAll({ where: { id: idsProductos } })
+            : [];
+        const productoPorId = new Map(productos.map((p) => [p.id, p]));
+
+        const data = pedidos.map((pedido) => ({
+            id: pedido.id,
+            estado: pedido.estado,
+            total: pedido.total,
+            fecha: pedido.fecha,
+            productos: detalles
+                .filter((d) => d.idPedido === pedido.id)
+                .map((d) => ({
+                    idProducto: d.idProducto,
+                    nombre: productoPorId.get(d.idProducto)?.nombre || 'Producto',
+                    cantidad: d.cantidad,
+                    precioUnitario: d.precioUnitario,
+                    subtotal: d.subtotal,
+                })),
+        }));
+
+        res.json({ estado: true, data });
+    } catch (error) {
+        console.error('Error en obtenerMisPedidos:', error);
+        res.status(500).json({ estado: false, mensaje: 'Error al obtener tus pedidos.' });
+    }
+};

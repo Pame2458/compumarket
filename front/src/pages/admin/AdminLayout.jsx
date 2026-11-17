@@ -20,8 +20,8 @@ const menuItems = [
     { to: '/admin/categorias', label: 'Categorías', icon: '🏷️' },
     { to: '/admin/marcas', label: 'Marcas', icon: '🏭' },
     { to: '/admin/productos', label: 'Productos', icon: '📦' },
-    { to: '/admin/pedidos', label: 'Pedidos', icon: '🧾' },
 ];
+
 function AdminLayout() {
     const { admin, logout, esAdmin, esOperador, puedeEscribir, cargando } = useAdminAuth();
     const navigate = useNavigate();
@@ -47,7 +47,7 @@ function AdminLayout() {
             <aside className="w-full border-b border-slate-700 bg-slate-900 md:w-64 md:border-b-0 md:border-r">
                 <div className="p-5">
                     <h2 className="text-lg font-bold text-white">Panel Admin</h2>
-                    <p className="text-xs text-slate-400">INTEGRADO</p>
+                    <p className="text-xs text-slate-400">Administrador</p>
                 </div>
 
                 <nav className="flex flex-col gap-1 px-3 pb-4">

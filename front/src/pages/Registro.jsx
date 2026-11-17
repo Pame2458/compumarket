@@ -1,11 +1,10 @@
 // Registro.jsx - Página de registro para nuevos clientes.
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import logo from '../img/logo.jpg';
 
 function Registro() {
-    const navigate = useNavigate();
     const { registro } = useAuth();
 
     const [nombre, setNombre] = useState('');
@@ -15,6 +14,7 @@ function Registro() {
     const [error, setError] = useState('');
     const [enviando, setEnviando] = useState(false);
     const [mostrarPassword, setMostrarPassword] = useState(false);
+    const [registrado, setRegistrado] = useState(false);
 
     // Validaciones en tiempo real para la contraseña
     const validaciones = {
@@ -24,7 +24,6 @@ function Registro() {
         simbolo: /[^A-Za-z0-9]/.test(password)
     };
 
-    // Verifica si cumple absolutamente todos los requisitos
     const esPasswordValido = Object.values(validaciones).every(Boolean);
 
     const handleSubmit = async (e) => {
@@ -36,7 +35,6 @@ function Registro() {
             return;
         }
 
-        // Nueva validación de contraseña segura antes de enviar al backend
         if (!esPasswordValido) {
             setError('La contraseña no cumple con los requisitos de seguridad mínimos.');
             return;
@@ -44,11 +42,11 @@ function Registro() {
 
         try {
             setEnviando(true);
-            
-            // Se restaura la llamada real de registro y redirección
+
             await registro({ nombre, apellido, email, password });
-            
-            navigate('/');
+
+            // Ya no se inicia sesión: el cliente debe verificar su correo primero
+            setRegistrado(true);
         } catch (err) {
             console.error('Error al registrar cliente:', err);
             setError(err.message || 'Error al registrar la cuenta. Intentá nuevamente.');
@@ -57,14 +55,45 @@ function Registro() {
         }
     };
 
+    // Pantalla de confirmación luego del registro
+    if (registrado) {
+        return (
+            <div className="mx-auto max-w-md space-y-6 pt-2">
+                <div className="text-center flex flex-col items-center justify-center">
+                    <img
+                        src={logo}
+                        alt="Logo compuMarket"
+                        className="h-14 w-auto mb-3 object-contain"
+                    />
+                    <h1 className="text-2xl font-black text-slate-900 tracking-tight">¡Revisá tu correo!</h1>
+                </div>
+
+                <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm">
+                    <p className="text-sm text-slate-700">
+                        Te enviamos un enlace de verificación a{' '}
+                        <span className="font-bold text-slate-900">{email}</span>.
+                    </p>
+                    <p className="text-xs text-slate-500">
+                        El enlace vence en 15 minutos. Si no lo ves, revisá la carpeta de spam.
+                    </p>
+                    <Link
+                        to="/login"
+                        className="mt-2 inline-block w-full rounded-xl bg-red-600 py-3 text-center text-sm font-bold uppercase tracking-wider text-white shadow-sm transition hover:bg-red-700"
+                    >
+                        Ir a iniciar sesión
+                    </Link>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="mx-auto max-w-md space-y-6 pt-2">
             {/* Encabezado con la identidad de compuMarket */}
             <div className="text-center flex flex-col items-center justify-center">
-                {/* 1. LOGO DE TU PROYECTO INCORPORADO AQUÍ */}
-                <img 
+                <img
                     src={logo}
-                    alt="Logo compuMarket" 
+                    alt="Logo compuMarket"
                     className="h-14 w-auto mb-3 object-contain"
                 />
                 <h1 className="text-2xl font-black text-slate-900 tracking-tight">Crear Cuenta</h1>
@@ -72,15 +101,14 @@ function Registro() {
                     Únete a la comunidad líder en hardware de alto rendimiento.
                 </p>
             </div>
-            
 
             {/* Banner de Errores Estilizado */}
             {error && (
                 <div className="rounded-xl border border-red-200 bg-red-50 p-3.5 text-xs font-semibold text-red-700 transition-all duration-300 ease-in-out flex items-center justify-between">
                     <span>⚠️ {error}</span>
-                    <button 
+                    <button
                         type="button"
-                        onClick={() => setError('')} 
+                        onClick={() => setError('')}
                         className="text-red-500 hover:text-red-700 font-bold text-sm ml-2 px-1"
                     >
                         ×
@@ -88,7 +116,7 @@ function Registro() {
                 </div>
             )}
 
-            {/* Formulario con botones rojos y enfoque de marca */}
+            {/* Formulario */}
             <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
@@ -126,7 +154,7 @@ function Registro() {
                     />
                 </div>
 
-                {/* 2. CONTRASEÑA MEJORADA CON MOSTRAR/OCULTAR Y REQUISITOS EN VERDE */}
+                {/* Contraseña con mostrar/ocultar y requisitos en verde */}
                 <div>
                     <label className="mb-1 block text-xs font-bold text-slate-700 uppercase tracking-wider">Contraseña *</label>
                     <div className="relative">
@@ -147,10 +175,9 @@ function Registro() {
                         </button>
                     </div>
 
-                    {/* Lista dinámica de requisitos (Cambia a verde si se cumple) */}
                     <div className="mt-3 p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-1.5 text-[11px] font-medium">
                         <p className="font-bold text-slate-400 uppercase tracking-wider mb-1 text-[10px]">Requisitos de seguridad:</p>
-                        
+
                         <div className="flex items-center gap-1.5 transition-colors">
                             <span className={validaciones.longitud ? "text-green-600 font-bold" : "text-slate-400"}>
                                 {validaciones.longitud ? "✓" : "○"} Mínimo 10 caracteres
@@ -174,12 +201,10 @@ function Registro() {
                     </div>
                 </div>
 
-                {/* Aviso de Términos y Condiciones Visuales */}
                 <p className="text-[11px] text-slate-500 leading-normal pt-1">
                     Al hacer clic en el botón de abajo, aceptas los <span className="text-red-600 font-bold hover:underline cursor-pointer">Términos de Servicio</span> y las políticas de privacidad de la tienda.
                 </p>
 
-                {/* Botón de Registro en Color Rojo */}
                 <button
                     type="submit"
                     disabled={enviando}
@@ -189,14 +214,14 @@ function Registro() {
                 </button>
             </form>
 
-            {/* Enlace alternativo para retornar al login */}
             <p className="text-center text-xs text-slate-500 font-medium">
                 ¿Ya tienes una cuenta?{' '}
-                  <Link to="/login" className="font-bold text-red-600 hover:underline">
+                <Link to="/login" className="font-bold text-red-600 hover:underline">
                     Iniciar Sesión
                 </Link>
             </p>
-        </div> 
+        </div>
     );
-} 
+}
+
 export default Registro;
