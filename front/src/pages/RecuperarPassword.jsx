@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { forgotPasswordCliente } from '../services/authService.js'; 
-import logo from '../img/logo.jpg';
+import logo from '../components/assets/log.png';
 
 function RecuperarPassword() {
     const [email, setEmail] = useState('');

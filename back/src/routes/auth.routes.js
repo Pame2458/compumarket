@@ -13,7 +13,7 @@ import {
     refreshTokenAdmin,
     obtenerPerfilAdmin,
 } from '../controllers/auth.controller.js';
-import { verificarCliente, verificarAdmin } from '../middlewares/auth.middleware.js';
+import { verificarCliente, verificarAdmin, verificarAdminParaRefresh } from '../middlewares/auth.middleware.js';
 
 const router = Router();
 
@@ -34,7 +34,7 @@ router.get('/cliente/refresh', verificarCliente, refreshTokenCliente);
 router.get('/cliente/perfil', verificarCliente, obtenerPerfilCliente);
 router.put('/cliente/perfil', verificarCliente, actualizarPerfilCliente);
 router.put('/cliente/password', verificarCliente, cambiarPassword);
-router.get('/admin/refresh', verificarAdmin, refreshTokenAdmin);
+router.get('/admin/refresh', verificarAdminParaRefresh, refreshTokenAdmin);  
 router.get('/admin/perfil', verificarAdmin, obtenerPerfilAdmin);
 
 export default router;

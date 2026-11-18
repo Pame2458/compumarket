@@ -2,7 +2,8 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { restablecerPasswordCliente } from '../services/authService.js';
-import logo from '../img/logo.jpg';
+import logo from '../components/assets/log.png';
+
 
 
 function RestablecerPassword() {

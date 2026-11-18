@@ -77,7 +77,7 @@ export const seedComputacion = async () => {
             where: { email: 'cliente@compumarket.com' },
             defaults: {
                 nombre: 'Juan', apellido: 'Pérez', telefono: '1155550101',
-                password: 'Cliente#2026', emailVerificado: true,
+                password: 'Cliente-2026', emailVerificado: true,
             },
         });
         await Domicilio.findOrCreate({

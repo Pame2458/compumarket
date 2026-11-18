@@ -14,7 +14,7 @@ import {
     actualizarAdministrador,
     eliminarAdministrador,
 } from '../../services/adminService.js';
-
+import { Pencil, Trash2 } from 'lucide-react';
 function AdminUsuarios() {
     const { esAdmin, esOperador, puedeEscribir, admin } = useAdminAuth();
 
@@ -125,7 +125,6 @@ function AdminUsuarios() {
         setPagina(1);
     };
 
-    // Componente auxiliar para renderizar la flecha de orden en cada columna
     const renderSortArrow = (columna) => {
         const isActive = ordenarPor === columna;
         return (
@@ -635,20 +634,24 @@ function AdminUsuarios() {
                                         </td>
                                         {puedeEscribir && (
                                             <td className="px-4 py-3 text-right whitespace-nowrap">
-                                                <button
-                                                    onClick={() => iniciarEdicion(u)}
-                                                    className="mr-2 rounded-lg px-2.5 py-1 text-xs font-semibold text-indigo-600 transition hover:bg-indigo-50 hover:text-indigo-800"
-                                                >
-                                                    Editar
-                                                </button>
-                                                {u.id !== admin?.id && (
-                                                    <button
-                                                        onClick={() => handleEliminar(u.id)}
-                                                        className="rounded-lg px-2.5 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50 hover:text-red-800"
-                                                    >
-                                                        Eliminar
-                                                    </button>
-                                                )}
+                                               <button                                             
+    onClick={() => iniciarEdicion(u)}
+    title="Editar"
+    aria-label={`Editar ${u.nombre}`}
+    className="mr-1 rounded-lg p-2 text-indigo-600 transition hover:bg-indigo-50 hover:text-indigo-800"
+>
+    <Pencil size={18} />
+                                        </button>
+                                        {u.id !== admin?.id && (
+                                            <button
+                                               onClick={() => handleEliminar(u.id)}
+                                                title="Eliminar"
+                                                aria-label={`Eliminar ${u.nombre}`}
+                                                className="rounded-lg p-2 text-red-600 transition hover:bg-red-50 hover:text-red-800"
+                                            >
+                                               <Trash2 size={18} />
+                                           </button>
+                                        )}
                                             </td>
                                         )}
                                     </tr>
